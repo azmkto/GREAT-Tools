@@ -32,6 +32,13 @@ On a Colab runtime — including VS Code attached to one — install from GitHub
 
 See [TUTORIAL.md §1](TUTORIAL.md) for all three environments and private-repo access.
 
+## Docs
+
+| | |
+|---|---|
+| [TUTORIAL.md](TUTORIAL.md) | Installing and using the library — local, VS Code + Colab extension, and Colab |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | For collaborators: getting the latest, and getting your changes in |
+
 ## Use
 
 The common symbols are re-exported at the top level:
