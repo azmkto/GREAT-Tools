@@ -304,8 +304,8 @@ Two things worth knowing before you use them:
 
 ## 4. Updating the library
 
-This section is the solo loop. If other people have push access to the repo, use the
-pull-request workflow in **§9** instead of committing straight to `main`.
+This section is the solo loop. If other people have push access to the repo, follow
+**[CONTRIBUTING.md](CONTRIBUTING.md)** instead of committing straight to `main`.
 
 ### You're changing `great` itself (fixing a bug, adding a function)
 
@@ -368,7 +368,8 @@ Then notebooks that need stability pin to it instead of `main`:
 ## 5. Adding something new
 
 When you find a second notebook copy-pasting the same helper, that's the signal to
-move it here instead. (§9.4 lists what a reviewer checks when you do.) A few conventions worth keeping:
+move it here instead.
+([CONTRIBUTING.md §2.7](CONTRIBUTING.md) lists what a reviewer checks when you do.) A few conventions worth keeping:
 
 - Small, pure functions and constants — no `st.something`, no `input()`, nothing
   that only makes sense inside one specific notebook's flow.
@@ -470,174 +471,19 @@ They still carry their own copy-pasted helpers and do not import `great`.
 
 ## 9. Collaborating on the library
 
-§4 covers changing the library when you are the only one touching it. This section is the
-multi-person version: how a teammate gets started, how changes get in, and the handful of
-mistakes that are specific to *this* package.
+Working on `great` with other people — getting their changes, and getting yours in — has its
+own document: **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
-The whole point is that a helper written once ends up in `great/` where everyone gets it,
-instead of being pasted into a fourth notebook. Everything below serves that.
+It covers:
 
-### 9.1 Day one for a new collaborator
+| | |
+|---|---|
+| §0 | Day one for a new collaborator |
+| §1 | Getting the latest — locally, and on a Colab runtime |
+| §2 | Making a change: does it belong here, the branch/PR loop, where code goes, testing, review |
+| §3 | The three traps — notebook conflicts, dependency extras, breaking changes |
+| §4 | What never gets committed |
 
-1. Accept the emailed repository invitation (you cannot clone before this).
-2. Clone and install — see §1a for the full explanation:
-   ```bash
-   git clone https://github.com/<owner>/great.git
-   cd great
-   py -3.11 -m pip install -e ".[all]"
-   ```
-3. Set your identity, so reviewers know whose commit is whose:
-   ```bash
-   git config user.name "Your Name"
-   git config user.email "you@example.com"
-   ```
-4. Prove it worked, **from a directory that is not the clone**:
-   ```bash
-   py -3.11 -c "from great import sent_colors; from great.viz import weekly_overview; print(sent_colors)"
-   ```
-   Printing the palette means `great` is importable from any notebook on your machine. If it
-   fails, you are in §1a's `ModuleNotFoundError` case — wrong interpreter.
-5. Read §2 (quick start), §3 (module reference) and §5 (what belongs in the library).
-
-### 9.2 The change loop
-
-Never commit to `main` directly. One branch per change, reviewed by someone else, merged
-through a pull request. That single rule is what keeps this library from rotting back into
-copy-paste.
-
-```bash
-git pull                              # always start from current main
-git checkout -b fix-date-parsing      # one branch, one concern
-#   ...edit, test (§9.5)...
-git add -A
-git commit -m "Parse dates as ISO8601 so pandas 3 stops swapping day and month"
-git push -u origin fix-date-parsing
-```
-
-Then open a Pull Request on GitHub, get a review, merge it, and delete the branch. Afterwards
-everyone else picks it up with a plain `git pull` — no reinstall, because §1a installed it
-editable.
-
-**Branch names** — a prefix and a few words: `fix-`, `add-`, `docs-`, `refactor-`.
-E.g. `add-emotion-palette`, `docs-colab-setup`.
-
-**Commit messages** — say *why*, not *what*; the diff already shows what. "Parse dates as
-ISO8601 so pandas 3 stops swapping day and month" tells the next person something.
-"Update prep.py" does not.
-
-**Keep your branch current.** If `main` moved while you were working:
-
-```bash
-git pull --rebase origin main
-```
-
-Rebase keeps history linear and readable. One caveat: do not rebase a branch someone else has
-already pulled — it rewrites commits they have, and their next pull will conflict messily. If
-someone else is on your branch, use `git merge origin/main` instead.
-
-### 9.3 Protecting `main`
-
-Worth two minutes: repo → **Settings → Branches → Add branch protection rule** → branch name
-`main` → tick **Require a pull request before merging**. This turns "nobody commits to main
-directly" from a convention people forget into something GitHub enforces.
-
-### 9.4 Reviewing a pull request
-
-Beyond the usual "does it work", these four are the failure modes this package has actually
-hit. They are worth checking every time.
-
-**1. Does the code read a name it never received?** In a notebook everything is global, so a
-function can read a variable it was never passed and still work. Moved into a module, the same
-function raises `NameError`. Three functions here did exactly that — `plot_sentiment_platform_overview`
-read `ps_data`, `plat_data` and `sent_data` off the notebook's globals. Every input a function
-uses must be a parameter.
-
-**2. Is a new dependency in the right extra?** `pyproject.toml` splits deps into `text`, `ml`,
-`viz` and `all`. Anything imported **at module level** under `great/viz/` must be reachable
-from the `viz` extra, or `from great.viz import prep` breaks for everyone — this happened when
-`scikit-learn` was moved into its own `ml` extra while `great/viz/wordcloud.py` still imported
-`TfidfVectorizer` at import time. `viz` now includes `great[ml]` for that reason. Also confirm
-`import great` alone still does not require matplotlib, sklearn or wordcloud.
-
-**3. Does it belong in the library?** §5's rule: move it in when a *second* notebook needs it.
-One-off analysis stays in the notebook.
-
-**4. Does it change results for existing notebooks?** If a function's output changes, say so
-in the PR — see §9.6.
-
-### 9.5 Testing before you push
-
-There is no test suite, so these are the checks. Run them from the repo root unless noted.
-
-```bash
-# 1. Everything still imports, from OUTSIDE the clone
-cd /
-py -3.11 -c "import great; from great.viz import prep, checks, wordcloud, weekly_overview, monthly_overview; print('ok')"
-
-# 2. The core stays lightweight - this must print False False False
-py -3.11 -c "import sys, great; print('matplotlib' in sys.modules, 'sklearn' in sys.modules, 'wordcloud' in sys.modules)"
-```
-
-Then re-run both example notebooks end to end and confirm zero errors — they are the closest
-thing to an integration test:
-
-```bash
-py -3.11 -c "import nbformat; from nbclient import NotebookClient; [NotebookClient(nbformat.read(p, as_version=4), timeout=1800, kernel_name='python3').execute() for p in [r'Weekly Visualization\example_weekly_with_great.ipynb', r'Monthly Visualization\example_monthly_with_great.ipynb']]; print('both notebooks ran clean')"
-```
-
-If you changed anything that feeds a number, compare the returned `sent_pct_df` and
-`platform_totals_df` against the previous run before and after. A refactor that is meant to
-change nothing should change nothing.
-
-### 9.6 Breaking changes and versions
-
-Everyone's notebooks import the same package, so renaming or removing a function breaks their
-work silently at their next `git pull`. When that is unavoidable:
-
-1. Say so plainly in the PR description, including what to rename.
-2. Bump `version` in `pyproject.toml`.
-3. Tag the release so old notebooks can pin a known-good version:
-   ```bash
-   git tag v0.2.0
-   git push --tags
-   ```
-
-§4 documents the pinned-install syntax for Colab. Prefer adding a new function over changing
-an existing one's behaviour; deprecate rather than delete when you can.
-
-### 9.7 Notebook conflicts — read this before editing a notebook
-
-The notebooks in this repo keep their outputs, including embedded figures. That makes them
-megabytes of base64, and **git cannot merge two people's edits to the same notebook.** You
-will get a conflict that is impossible to resolve by hand.
-
-The rules that avoid it:
-
-- **One person owns a notebook at a time.** Say in the PR (or just tell the team) that you are
-  editing it before you start.
-- **Never hand-merge notebook JSON.** If you do hit a conflict, take one side whole and re-run:
-  ```bash
-  git checkout --theirs "Monthly Visualization/example_monthly_with_great.ipynb"
-  # or --ours to keep your version
-  ```
-  then re-execute the notebook top to bottom and commit the result.
-- **Prefer changing the library over the notebook.** Python files in `great/` merge cleanly
-  like any code. A notebook does not. This is the same instinct §5 asks for, with a second
-  reason behind it.
-
-If notebook conflicts become routine, revisit stripping outputs from the two `example_*`
-notebooks — they regenerate in about two minutes. The two archived `pol_*_viz.ipynb` should
-keep their outputs regardless: the `dayfirst` bug in §6 means re-running them now produces
-*wrong dates*, so their stored outputs are the only correct record of that analysis.
-
-### 9.8 What never gets committed
-
-- **Data exports.** `.gitignore` blocks `*.xlsx`, `*.xls`, `*.csv` and `*.zip`. Keep it that
-  way — the exports contain real mention text and author names, and they are large.
-- **Tokens, of any kind.** Not in a cell, not in a file, not in a commit message. §1b and §1d
-  cover doing it properly. If one leaks, revoke it on GitHub immediately; deleting the commit
-  is not enough, because it stays in the history and in every clone.
-- **Virtualenvs** (`.venv/`) and build artifacts — also gitignored.
-
-A private repo is not a safe place for secrets. Every collaborator can read everything in it,
-and access can outlive your intent.
+The short version: **nobody commits to `main` directly.** One branch per change, reviewed by
+someone else, merged through a Pull Request. §4 above is the solo loop, for when you are the
+only person with push access.
