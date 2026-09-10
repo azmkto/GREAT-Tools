@@ -45,7 +45,11 @@ New here? Do [day one](#0-day-one) first. Installing is covered in
    ```
    If it prints the palette, you are set. If you get `ModuleNotFoundError`, your Jupyter kernel
    is a different Python than the one you installed into — see TUTORIAL.md §1a.
-5. Skim [TUTORIAL.md §2 and §3](TUTORIAL.md) so you know what already exists. Adding a second
+5. **Only if you will use Colab** (browser, or VS Code attached to a Colab runtime): create
+   a GitHub token — [TUTORIAL.md §1d](TUTORIAL.md) has the steps. As a collaborator you need a
+   **classic** token with the `repo` scope; fine-grained tokens cannot reach a private repo
+   owned by someone else’s personal account. Working locally needs no token at all.
+6. Skim [TUTORIAL.md §2 and §3](TUTORIAL.md) so you know what already exists. Adding a second
    version of something the library already has is the most common wasted effort here.
 
 ---
