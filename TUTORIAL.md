@@ -6,8 +6,15 @@ copy-pasted across `Evolution Project`, `Topic Modelling Trial`, `IHSG Narrative
 and `Weekly Monthly Visualization Program`. This doc covers installing it, using it,
 and keeping it up to date.
 
-Import name: `great` (e.g. `from great import sent_colors`)
-Repo: `github.com/<owner>/great` — private, see §1d for access
+| | |
+|---|---|
+| **Repo** | `github.com/azmkto/GREAT-Tools` — private, see §1d for access |
+| **Package** | `great` — what you install and import: `from great import sent_colors` |
+
+The two names differ on purpose. The repository is **GREAT-Tools**; the Python package inside
+it is **great**. So you clone `GREAT-Tools` but write `import great`, and a pip install from
+GitHub names both: `"great[all] @ git+https://github.com/azmkto/GREAT-Tools.git"` — package on
+the left, repository on the right.
 
 ---
 
@@ -36,8 +43,8 @@ print('cloud runtime' if pathlib.Path('/content').exists() else 'local interpret
 Clone once, then install from the clone:
 
 ```bash
-git clone https://github.com/<owner>/great.git
-cd great
+git clone https://github.com/azmkto/GREAT-Tools.git
+cd GREAT-Tools
 py -3.11 -m pip install -e ".[all]"
 ```
 
@@ -113,7 +120,7 @@ during this session.
 ```python
 import getpass
 token = getpass.getpass('GitHub PAT: ')    # paste at the prompt, never into a cell
-%pip install -q "great[all] @ git+https://{token}@github.com/<owner>/great.git"
+%pip install -q "great[all] @ git+https://{token}@github.com/azmkto/GREAT-Tools.git"
 ```
 
 `getpass` keeps the token out of the saved `.ipynb` and out of cell output. **§1d has the
@@ -131,7 +138,7 @@ updates it with no reinstall:
 ```python
 import getpass
 token = getpass.getpass('GitHub PAT: ')
-!git clone -q https://{token}@github.com/<owner>/great.git /content/great
+!git clone -q https://{token}@github.com/azmkto/GREAT-Tools.git /content/great
 %pip install -q -e "/content/great[all]"
 ```
 
@@ -179,7 +186,7 @@ local path. Add this as the *first* cell:
 ```python
 from google.colab import userdata
 token = userdata.get('GH_TOKEN')
-%pip install -q "great[all] @ git+https://{token}@github.com/<owner>/great.git"
+%pip install -q "great[all] @ git+https://{token}@github.com/azmkto/GREAT-Tools.git"
 ```
 
 Store the token in the Colab Secrets panel (key icon, left sidebar) as `GH_TOKEN` — **§1d
@@ -187,7 +194,7 @@ walks through creating it and adding it there.**
 If the repo were public, the token part drops out entirely:
 
 ```python
-%pip install -q "great[all] @ git+https://github.com/<owner>/great.git"
+%pip install -q "great[all] @ git+https://github.com/azmkto/GREAT-Tools.git"
 ```
 
 Colab installed a *snapshot*, so it will not see new commits on its own. To update, reinstall
@@ -246,7 +253,7 @@ team opens the same shared notebook, each person's token stays private to them.
 ```python
 from google.colab import userdata
 token = userdata.get('GH_TOKEN')
-%pip install -q "great[all] @ git+https://{token}@github.com/<owner>/great.git"
+%pip install -q "great[all] @ git+https://{token}@github.com/azmkto/GREAT-Tools.git"
 ```
 
 **In VS Code attached to a Colab runtime (§1b)** — use `getpass` and paste at the prompt:
@@ -254,7 +261,7 @@ token = userdata.get('GH_TOKEN')
 ```python
 import getpass
 token = getpass.getpass('GitHub PAT: ')
-%pip install -q "great[all] @ git+https://{token}@github.com/<owner>/great.git"
+%pip install -q "great[all] @ git+https://{token}@github.com/azmkto/GREAT-Tools.git"
 ```
 
 Either way the token never enters the saved `.ipynb`.
@@ -278,8 +285,8 @@ Once you are added as a Collaborator, a normal `git clone` works using whatever 
 credential manager you already have configured with GitHub:
 
 ```bash
-git clone git@github.com:<owner>/great.git      # or the https:// URL with a credential manager
-cd great
+git clone git@github.com:azmkto/GREAT-Tools.git      # or the https:// URL with a credential manager
+cd GREAT-Tools
 py -3.11 -m pip install -e ".[all]"
 ```
 
@@ -410,7 +417,7 @@ This section is the solo loop. If other people have push access to the repo, fol
   own. Force it:
 
   ```python
-  %pip install --upgrade --force-reinstall --no-deps git+https://github.com/<owner>/great.git -q
+  %pip install --upgrade --force-reinstall --no-deps git+https://github.com/azmkto/GREAT-Tools.git -q
   ```
 
   then **Runtime → Restart runtime** — same reason as the autoreload note above:
@@ -430,8 +437,8 @@ git push --tags
 Then notebooks that need stability pin to it instead of `main`:
 
 ```python
-%pip install git+https://github.com/<owner>/great.git@v0.1.0 -q   # pinned, reproducible
-%pip install git+https://github.com/<owner>/great.git -q          # always latest, active development
+%pip install git+https://github.com/azmkto/GREAT-Tools.git@v0.1.0 -q   # pinned, reproducible
+%pip install git+https://github.com/azmkto/GREAT-Tools.git -q          # always latest, active development
 ```
 
 ---

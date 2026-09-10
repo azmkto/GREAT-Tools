@@ -1,5 +1,8 @@
 # great
 
+The Python package inside the **GREAT-Tools** repository. You clone `GREAT-Tools`; you import
+`great`.
+
 Shared utilities for azmkto's social-media research notebooks — one place for the
 label vocabulary, color palette, text cleaning, environmental-issue rules, province
 geography, and the weekly/monthly visualization helpers that used to be copy-pasted across
@@ -11,8 +14,8 @@ geography, and the weekly/monthly visualization helpers that used to be copy-pas
 Clone, then install from the clone (editable — picks up edits without reinstalling):
 
 ```bash
-git clone https://github.com/<owner>/great.git
-cd great
+git clone https://github.com/azmkto/GREAT-Tools.git
+cd GREAT-Tools
 py -3.11 -m pip install -e ".[all]"
 ```
 
@@ -27,7 +30,7 @@ plain `import great` needs none of them.
 On a Colab runtime — including VS Code attached to one — install from GitHub instead:
 
 ```python
-%pip install -q "great[all] @ git+https://github.com/<owner>/great.git"
+%pip install -q "great[all] @ git+https://github.com/azmkto/GREAT-Tools.git"
 ```
 
 See [TUTORIAL.md §1](TUTORIAL.md) for all three environments and private-repo access.

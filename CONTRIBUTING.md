@@ -29,8 +29,8 @@ New here? Do [day one](#0-day-one) first. Installing is covered in
 1. Accept the emailed repository invitation. You cannot clone before this.
 2. Clone and install:
    ```bash
-   git clone https://github.com/<owner>/great.git
-   cd great
+   git clone https://github.com/azmkto/GREAT-Tools.git
+   cd GREAT-Tools
    py -3.11 -m pip install -e ".[all]"
    ```
 3. Set your identity so reviewers know whose commit is whose:
@@ -87,7 +87,7 @@ git log -p -- great/           # the actual diffs to library code
 The runtime installed a *snapshot* from GitHub, so it will not see new commits on its own:
 
 ```python
-%pip install -q --upgrade --force-reinstall --no-deps "great[all] @ git+https://{token}@github.com/<owner>/great.git"
+%pip install -q --upgrade --force-reinstall --no-deps "great[all] @ git+https://{token}@github.com/azmkto/GREAT-Tools.git"
 ```
 
 Then **restart the runtime** — `--force-reinstall` replaces the files, but the already-imported
@@ -101,7 +101,7 @@ Someone probably changed behaviour you depended on. Check the recent commits and
 introduced it, then either adapt your notebook or pin a known-good version while you do:
 
 ```python
-%pip install -q "great[all] @ git+https://github.com/<owner>/great.git@v0.1.0"
+%pip install -q "great[all] @ git+https://github.com/azmkto/GREAT-Tools.git@v0.1.0"
 ```
 
 Say something in the repo's Issues. If a change broke your work it will break someone else's.
