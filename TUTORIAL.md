@@ -116,8 +116,9 @@ token = getpass.getpass('GitHub PAT: ')    # paste at the prompt, never into a c
 %pip install -q "great[all] @ git+https://{token}@github.com/<owner>/great.git"
 ```
 
-`getpass` keeps the token out of the saved `.ipynb` and out of cell output. See §1d for
-creating a fine-grained, read-only PAT.
+`getpass` keeps the token out of the saved `.ipynb` and out of cell output. **§1d has the
+step-by-step for creating your token** — note that repo owners and collaborators need
+*different* token types.
 
 > **Token hygiene.** A *failed* pip install can echo the full URL — token included — in its
 > error text. If that ever lands in a notebook you share, revoke the token and issue a new one.
@@ -181,7 +182,8 @@ token = userdata.get('GH_TOKEN')
 %pip install -q "great[all] @ git+https://{token}@github.com/<owner>/great.git"
 ```
 
-Store the token in the Colab Secrets panel (key icon, left sidebar) as `GH_TOKEN` — see §1d.
+Store the token in the Colab Secrets panel (key icon, left sidebar) as `GH_TOKEN` — **§1d
+walks through creating it and adding it there.**
 If the repo were public, the token part drops out entirely:
 
 ```python
@@ -191,14 +193,89 @@ If the repo were public, the token part drops out entirely:
 Colab installed a *snapshot*, so it will not see new commits on its own. To update, reinstall
 with `--force-reinstall --no-deps` and then **Restart runtime** (§4).
 
-### 1d. Team access to a private repo
+### 1d. Team access to a private repo — creating your token
 
 Nothing about the package or the install commands changes for a teammate — only *how they
-authenticate*. Two cases:
+authenticate*.
 
-**Local (§1a) — no token needed at all.** Once someone is added as a Collaborator, their normal
-`git clone`, using whatever SSH key or credential manager they already have configured with
-GitHub, just works:
+**First: do you even need a token?** Only if you are on a **cloud runtime** (§1b or §1c). For
+local work (§1a) the answer is no — see the last part of this section.
+
+> **The catch, and it decides which token you make.** A fine-grained token can only reach
+> repositories owned by *you*, or by an organization you belong to. This repo is owned by a
+> personal account, so a **collaborator cannot use a fine-grained token for it** — GitHub
+> documents this as a known limitation, and your "Resource owner" dropdown will simply never
+> list the owner's username. Collaborators must use a **classic** token instead. That is why
+> the two recipes below differ.
+
+#### If you own the repo — fine-grained token (preferred)
+
+Narrow and read-only, because your own account is a valid resource owner:
+
+1. GitHub → **Settings → Developer settings → Personal access tokens → Fine-grained tokens**
+2. **Generate new token**
+3. Name it (e.g. `great-colab`) and set an **expiration** — 90 days is reasonable
+4. **Resource owner:** your own account
+5. **Repository access:** *Only select repositories* → pick `great`
+6. **Permissions → Repository permissions → Contents: Read-only**
+   (Metadata: Read is added automatically and is required)
+7. **Generate token**, then **copy it immediately** — GitHub shows it exactly once
+
+#### If you are a collaborator — classic token
+
+1. GitHub → **Settings → Developer settings → Personal access tokens → Tokens (classic)**
+2. **Generate new token (classic)**
+3. Name it and set an **expiration**
+4. Tick the **`repo`** scope — required to read a private repository
+5. **Generate token**, then **copy it immediately**
+
+> **Know what you are holding.** The `repo` scope is broad: it grants read *and write* to every
+> repository your account can reach, not just this one. It is the only thing that works for a
+> collaborator on a personally-owned repo, so contain it — a short expiration, one token per
+> person, never shared, and delete it when you no longer need it. If the team outgrows this,
+> moving the repo under a GitHub Organization lets everyone use narrow fine-grained tokens
+> instead; that is the real fix.
+
+#### Using your token
+
+**In browser Colab (§1c)** — store it once instead of pasting it every session. Open the
+Secrets panel (key icon, left sidebar), add a secret named `GH_TOKEN`, paste the token as the
+value, and enable it for your notebook. Secrets are per-Colab-account, so even when the whole
+team opens the same shared notebook, each person's token stays private to them.
+
+```python
+from google.colab import userdata
+token = userdata.get('GH_TOKEN')
+%pip install -q "great[all] @ git+https://{token}@github.com/<owner>/great.git"
+```
+
+**In VS Code attached to a Colab runtime (§1b)** — use `getpass` and paste at the prompt:
+
+```python
+import getpass
+token = getpass.getpass('GitHub PAT: ')
+%pip install -q "great[all] @ git+https://{token}@github.com/<owner>/great.git"
+```
+
+Either way the token never enters the saved `.ipynb`.
+
+#### Token hygiene
+
+- **Never type a token into a cell**, a file, or a commit message. `getpass` and Colab Secrets
+  exist precisely so you do not have to.
+- **A failed `pip install` can echo the full URL — token included — in its error output.** If
+  that lands in a notebook you share, treat the token as compromised.
+- **If a token leaks, delete it on GitHub immediately.** Settings → Developer settings →
+  Personal access tokens → the token → **Delete**. Removing the commit is not enough; it stays
+  in the history and in every clone anyone already made.
+- **One token per person.** Never share one, so any single one can be revoked without
+  disrupting anybody else.
+- **Set an expiration.** A token that expires on its own is one you cannot forget to clean up.
+
+#### Local work needs no token at all (§1a)
+
+Once you are added as a Collaborator, a normal `git clone` works using whatever SSH key or
+credential manager you already have configured with GitHub:
 
 ```bash
 git clone git@github.com:<owner>/great.git      # or the https:// URL with a credential manager
@@ -206,26 +283,20 @@ cd great
 py -3.11 -m pip install -e ".[all]"
 ```
 
-**Any cloud runtime (§1b and §1c) — each person needs their own token.** A Colab VM has no
-persistent SSH key, so it authenticates over HTTPS with a credential in the URL:
+Over HTTPS, Git Credential Manager opens a browser for you to sign in the first time and
+remembers it after that. No token, no special step.
 
-1. Each person creates their own **fine-grained personal access token**, scoped to *only* this
-   repo, **read-only**, with an expiration date (GitHub → Settings → Developer settings →
-   Fine-grained tokens). Never a shared token — one per person, so it can be revoked
-   individually.
-2. In browser Colab (§1c) they store it in their own Colab Secrets as `GH_TOKEN`; secrets are
-   per-account, so even on the same shared notebook each person's stays private to them. In
-   VS Code (§1b) they use `getpass` instead.
-3. The install cell is otherwise identical for everyone.
+#### Granting and revoking access
 
-**Granting access.** For a handful of people, add them directly as Collaborators (repo →
-Settings → Collaborators → Add people). They must accept the emailed invitation before they can
-clone. If the team grows, or you want access managed centrally rather than repo-by-repo, move
-the repo under a GitHub Organization and grant access through a Team.
+**Granting.** For a handful of people, add them directly as Collaborators (repo → **Settings →
+Collaborators → Add people**). They must accept the emailed invitation before they can clone.
+If the team grows, or you want access managed centrally rather than repo-by-repo, move the repo
+under a GitHub Organization and grant access through a Team — which also unlocks fine-grained
+tokens for everyone.
 
-**Revoking access.** Removing someone from Collaborators immediately kills their access — their
-token and SSH key stop working for this repo without you having to touch the token itself.
-
+**Revoking.** Removing someone from Collaborators immediately kills their access to this repo.
+Their token keeps existing for their other repositories, but it stops working for this one, and
+you never have to touch the token itself.
 ---
 
 ## 2. Quick start
