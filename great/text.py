@@ -5,26 +5,28 @@ notebooks across four projects (`TM_LLM_CPU.ipynb`, `sn_needs.ipynb`,
 `TM_LLM_Trial.ipynb`, `RUUPA_Notebook.ipynb`, `Demo_27_Agustus_Notebook.ipynb`, plus
 separately in the three Evolution Project notebooks).
 
-`TOPIC_STOPWORDS_BASE` deliberately excludes subject-specific noise that was mixed
-into the original list (a politician's name and its compounds, one campaign
-hashtag, two usernames) — pass those per project via `clean_for_topics(...,
-extra_stopwords={...})` instead of baking one project's subject into every project.
-
-Two cleaners are exposed on purpose, matching two different real requirements in
-the source notebooks — this was previously invisible because both were called
-`clean()` in different files:
+Three cleaners are exposed, matching three different real requirements that used to
+be invisible because they were scattered across differently-named variables in
+different notebooks:
 
 - `clean_for_bert()` — for transformer input (IndoBERT etc). Keeps case,
   punctuation, and stopwords, because the transformer's own tokenizer needs them.
   Only fixes encoding, strips URLs/@mentions, unwraps hashtags, and normalises slang.
 - `clean_for_topics()` — for BERTopic / clustering input. Also lowercases, strips
   everything that isn't a letter, and removes stopwords (Sastrawi + NLTK Indonesian
-  + NLTK English + a hand-tuned social-media noise list), because topic clustering
-  wants content words only.
+  + NLTK English + `TOPIC_STOPWORDS_BASE`, a hand-tuned social-media noise list).
+  Deliberately does **not** strip the tracked actor's own name — BERTopic needs it
+  to tell a topic about them apart from a topic about someone else.
+- `clean_for_wordcloud()` — same as `clean_for_topics()`, plus `WORDCLOUD_STOPWORDS_EXTRA`
+  (a subject's name and generic political filler), because a word cloud of "every
+  post" is dominated by whoever the corpus is about — that word being in 40% of
+  posts is not information, so a word cloud (unlike a topic model) is better off
+  without it. Pass more via `extra_stopwords={...}` for a subject not already
+  covered by `WORDCLOUD_STOPWORDS_EXTRA`.
 
 `clean_for_topics()` needs `nltk` and `PySastrawi`; `clean_for_bert()` needs `ftfy`.
-Neither is a hard dependency of `riset` itself — install with `pip install
-"riset[text]"` to get both, or install them yourself if you only need one cleaner.
+Neither is a hard dependency of `great` itself — install with `pip install
+"great[text]"` to get both, or install them yourself if you only need one cleaner.
 """
 import html
 import re
@@ -43,7 +45,7 @@ SLANG = {
     "sy": "saya", "km": "kamu", "gw": "saya", "gue": "saya", "lo": "kamu", "lu": "kamu",
     "hrs": "harus", "bs": "bisa", "msh": "masih", "dlm": "dalam",
     "sblm": "sebelum", "stlh": "setelah", "pd": "pada", "pgn": "ingin", "pengen": "ingin",
-    "liat": "lihat", "abis": "habis",
+    "liat": "lihat", "abis": "habis", "ngutang": "utang",
 
     "bkn": "bukan", "gpp": "tidak apa-apa", "gapapa": "tidak apa-apa", "gaada": "tidak ada",
     "cmn": "cuma", "cuman": "cuma",
@@ -63,9 +65,10 @@ SLANG = {
     # extend this from your own corpus's most frequent non-dictionary tokens
 }
 
-# Social-media / broadcast noise for topic modelling — subject-specific terms
-# (politician names etc.) live in TOPIC_STOPWORDS_EXTRA so callers can opt in or
-# swap them per project instead of inheriting one project's subject into another's.
+# Social-media / broadcast noise for topic modelling. Kept in sync with the
+# `Base_SW` set from the production notebooks — this is the *topic-modelling*
+# tier: it deliberately does not strip a tracked actor's name (see
+# WORDCLOUD_STOPWORDS_EXTRA below for the tier that does).
 TOPIC_STOPWORDS_BASE = {
     'subscribe', 'shorts', 'channel', 'fyp', 'follow', 'com', 'www',
     'beritaterkini', 'selengkapnya', 'sumber', 'informasi', 'terkini',
@@ -76,20 +79,51 @@ TOPIC_STOPWORDS_BASE = {
     'deh', 'dong', 'kok', 'yah', 'lah', 'kan',
     'aja', 'udah', 'sdh', 'sampe', 'tau', 'gitu', 'gini', 'orang', 'bilang',
     'ngomong', 'lihat', 'pakai', 'banget', 'bgt', 'emang', 'kayak', 'kaya',
+    'kompascom', 'viralvideo',
     'shortvideo', 'youtubeshorts', 'beritaviral', 'trending', 'foryou',
-    'short', 'like', 'live', 'chat', 'streaming', 'audio', 'komen', 'komentar', 'yuk', 'cek',
+    'short', 'like', 'jagaindonesia', 'anutin', 'live', 'chat', 'streaming', 'audio',
+    'komen', 'komentar', 'yuk', 'cek',
     'baca', 'bantu', 'update', 'store', 'quot', 'klik', 'tonton', 'simak',
+    'tok', 'day', 'ipo', 'panggil', 'mulu', 'kek', 'rang', 'suruh', 'loh', 'lho',
+    '',  # no-op against .split() output — kept only for fidelity with the source list
 
     # platform / format residue
-    'youtube', 'facebook', 'tiktok', 'instagram', 'viralshorts', 'part',
+    'youtube', 'facebook', 'tiktok', 'instagram', 'viralshorts', 'part', 'shortvids',
+
+    # usernames / domains that slipped past @\w+
+    'lambesahamjja', 'ardisatriawan', 'tempodotco', 'detikcom', 'tribunnewscom',
+    'kumparancom', 'sindonewscom', 'beritasatucom', 'liputan6dotcom', 'okezonecom',
+    'merdeka', 'vivaid', 'suara', 'jpnnpic', 'killingmaster', 'nye',
+
+    # day-of-week noise
+    'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu',
 
     # calendar noise
     'januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli',
     'agustus', 'september', 'oktober', 'november', 'desember',
 
+    # generic political filler (present in every doc, carries no topic)
+    'indonesia', 'nasional', 'bangsa', 'masyarakat', 'publik', 'dunia', 'isu',
+    'momen', 'terbaru', 'terbaik', 'langkah', 'kinerja', 'memperkuat', 'menjaga',
+    'pertemuan', 'terkait', 'terbuka', 'eks',
+
     # colloquial residue / discourse particles
     'kena', 'kau', 'coba', 'doang', 'gara', 'mah', 'sok', 'pas', 'hati', 'mic',
-    'takut', 'geger',
+    'takut', 'allah', 'geger',
+}
+
+# Word-cloud tier: TOPIC_STOPWORDS_BASE plus a tracked actor's name and the same
+# political-filler block (kept independently, not just inherited from
+# TOPIC_STOPWORDS_BASE, so this stays correct on its own if that set changes
+# later). Use this — not TOPIC_STOPWORDS_BASE — when the output is a word cloud:
+# a name appearing in ~40% of posts isn't information, it just prints huge.
+WORDCLOUD_STOPWORDS_EXTRA = {
+    'prabowo', 'presiden', 'subianto', 'pemerintah', 'president',
+
+    # generic political filler (present in every doc, carries no topic)
+    'indonesia', 'nasional', 'bangsa', 'masyarakat', 'publik', 'dunia', 'isu',
+    'momen', 'terbaru', 'terbaik', 'langkah', 'kinerja', 'memperkuat', 'menjaga',
+    'pertemuan', 'terkait', 'terbuka', 'eks',
 }
 
 _stopwords_tm = None  # lazily built, cached
@@ -103,7 +137,7 @@ def normalize_slang(text: str) -> str:
 def clean_for_bert(text) -> str:
     """Clean text for transformer input. Keeps case, punctuation, stopwords.
 
-    Requires `ftfy` (`pip install ftfy` or `pip install "riset[text]"`).
+    Requires `ftfy` (`pip install ftfy` or `pip install "great[text]"`).
     """
     if not isinstance(text, str):
         return ''
@@ -133,7 +167,7 @@ def _load_topic_stopwords():
     except ImportError as e:
         raise ImportError(
             "clean_for_topics() requires nltk and PySastrawi: "
-            'pip install nltk PySastrawi (or pip install "riset[text]")'
+            'pip install nltk PySastrawi (or pip install "great[text]")'
         ) from e
 
     try:
@@ -149,26 +183,49 @@ def _load_topic_stopwords():
     return _stopwords_tm
 
 
-def clean_for_topics(text, extra_stopwords=None) -> str:
-    """Clean text for BERTopic / clustering input.
-
-    Lowercases, strips everything but letters, normalises slang, and removes
-    stopwords (Sastrawi + NLTK Indonesian + NLTK English + `TOPIC_STOPWORDS_BASE`,
-    plus anything passed in `extra_stopwords`). Drops tokens of length <= 2.
-
-    Requires `nltk` and `PySastrawi` (`pip install "riset[text]"`), downloaded once
-    on first call.
-    """
+def _clean_with_stopwords(text, stopwords) -> str:
+    """Shared body for clean_for_topics()/clean_for_wordcloud() — only the
+    stopword set differs between the two, so the cleaning pipeline lives once."""
     if not isinstance(text, str):
         return ''
-    stopwords_tm = _load_topic_stopwords()
-    if extra_stopwords:
-        stopwords_tm = stopwords_tm | {w.lower() for w in extra_stopwords}
-
     text = html.unescape(text)
     text = re.sub(r"http\S+|www\.\S+|@\w+", " ", text)                        # URLs + mentions
     text = re.sub(r"#(\w+)", lambda m: re.sub(r'(?<!^)(?=[A-Z])', ' ', m.group(1)), text)  # split CamelCase hashtags
     text = text.lower()
     text = re.sub(r"[^a-z\s]", " ", text)                                     # punctuation, digits, emoji
     text = normalize_slang(text)
-    return " ".join(w for w in text.split() if w not in stopwords_tm and len(w) > 2)
+    return " ".join(w for w in text.split() if w not in stopwords and len(w) > 2)
+
+
+def clean_for_topics(text, extra_stopwords=None) -> str:
+    """Clean text for BERTopic / clustering input.
+
+    Lowercases, strips everything but letters, normalises slang, and removes
+    stopwords (Sastrawi + NLTK Indonesian + NLTK English + `TOPIC_STOPWORDS_BASE`,
+    plus anything passed in `extra_stopwords`). Drops tokens of length <= 2.
+    Deliberately does *not* strip a tracked actor's name — see
+    `clean_for_wordcloud()` for the tier that does.
+
+    Requires `nltk` and `PySastrawi` (`pip install "great[text]"`), downloaded once
+    on first call.
+    """
+    stopwords_tm = _load_topic_stopwords()
+    if extra_stopwords:
+        stopwords_tm = stopwords_tm | {w.lower() for w in extra_stopwords}
+    return _clean_with_stopwords(text, stopwords_tm)
+
+
+def clean_for_wordcloud(text, extra_stopwords=None) -> str:
+    """Clean text for a word cloud. Same as `clean_for_topics()`, plus
+    `WORDCLOUD_STOPWORDS_EXTRA` — a tracked actor's name and generic political
+    filler — since a word cloud where that name is in ~40% of posts just prints
+    it huge, rather than telling you anything. Pass `extra_stopwords` for a
+    subject not already covered by `WORDCLOUD_STOPWORDS_EXTRA`.
+
+    Requires `nltk` and `PySastrawi` (`pip install "great[text]"`), downloaded once
+    on first call.
+    """
+    stopwords_wc = _load_topic_stopwords() | WORDCLOUD_STOPWORDS_EXTRA
+    if extra_stopwords:
+        stopwords_wc = stopwords_wc | {w.lower() for w in extra_stopwords}
+    return _clean_with_stopwords(text, stopwords_wc)

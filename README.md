@@ -1,34 +1,63 @@
-# riset
+# great
 
 Shared utilities for azmkto's social-media research notebooks — one place for the
-label vocabulary, color palette, text cleaning, environmental-issue rules, and province
-geography that used to be copy-pasted across `Evolution Project`, `Topic Modelling Trial`,
-`IHSG Narratives`, `Weekly Monthly Visualization Program`, and friends.
+label vocabulary, color palette, text cleaning, environmental-issue rules, province
+geography, and the weekly/monthly visualization helpers that used to be copy-pasted across
+`Evolution Project`, `Topic Modelling Trial`, `IHSG Narratives`,
+`Weekly Monthly Visualization Program`, and friends.
 
 ## Install
 
-Local (editable, picks up edits without reinstalling):
+Clone, then install from the clone (editable — picks up edits without reinstalling):
 
 ```bash
-pip install -e "C:\path\to\Research Project\Library"
+git clone https://github.com/<owner>/great.git
+cd great
+py -3.11 -m pip install -e ".[all]"
 ```
 
-Colab / anywhere else, once this is pushed to GitHub:
+Once installed, `import great` works from **any** notebook in any folder on your machine —
+no `sys.path` code needed, and `git pull` is the whole update procedure.
+
+`[all]` pulls every extra. To be selective: `text` (ftfy, nltk, PySastrawi), `ml`
+(scikit-learn), `viz` (matplotlib, scienceplots, wordcloud, seaborn, plotly — and `ml`).
+`great.viz` imports its dependencies at module level, so `[viz]` is required for any plotting;
+plain `import great` needs none of them.
+
+On a Colab runtime — including VS Code attached to one — install from GitHub instead:
 
 ```python
-%pip install git+https://github.com/azmkto/riset.git -q
+%pip install -q "great[all] @ git+https://github.com/<owner>/great.git"
 ```
+
+See [TUTORIAL.md §1](TUTORIAL.md) for all three environments and private-repo access.
 
 ## Use
 
+The common symbols are re-exported at the top level:
+
 ```python
-from riset.labels import sent_class, plat_class, MEDIA_MAP, normalize_majas
-from riset.palette import sent_colors, plat_colors, emo_colors
-from riset.text import clean_for_bert, clean_for_topics
-from riset.issues import classify_issue
-from riset.geo import PROVINCE_FIX, PULAU_MAP, GEO_FIX
-from riset.schema import validate_export
+from great import sent_class, plat_class, MEDIA_MAP, normalize_majas
+from great import sent_colors, plat_colors, emo_colors
+from great import validate_export, classify_issue
+from great import PROVINCE_FIX, PULAU_MAP, GEO_FIX
 ```
+
+`text` and `viz` are imported from their own modules, so the core package stays usable
+without their dependencies installed:
+
+```python
+from great.text import clean_for_bert, clean_for_topics
+from great.viz import prep, checks, wordcloud
+from great.viz.style import apply_style
+from great.viz.overview import weekly_overview, monthly_overview
+from great.viz.wordcloud import sentiment_wordclouds
+```
+
+Worked end-to-end examples live in
+[`Weekly Visualization/example_weekly_with_great.ipynb`](Weekly%20Visualization/example_weekly_with_great.ipynb)
+and
+[`Monthly Visualization/example_monthly_with_great.ipynb`](Monthly%20Visualization/example_monthly_with_great.ipynb).
 
 ## Modules
 
@@ -37,6 +66,13 @@ from riset.schema import validate_export
 | `labels.py` | Sentiment/platform/emotion class lists, `MEDIA_MAP`, majas label normalisation |
 | `palette.py` | `sent_colors`, `plat_colors`, `emo_colors` and shared plot-size constants |
 | `schema.py` | The canonical 13-column export schema and `validate_export()` |
-| `text.py` | `SLANG`, stopword sets, `clean_for_bert()`, `clean_for_topics()` |
+| `text.py` | `SLANG`, stopword sets, `clean_for_bert()`, `clean_for_topics()` — needs `[text]` |
 | `issues.py` | Environmental issue keyword rules and `classify_issue()` |
 | `geo.py` | Province name fixes and province→island mapping |
+| `viz/prep.py` | `prepare_data()`, `sentiment_data()`, `platform_data()`, `plat_sent_data()` |
+| `viz/checks.py` | `frame_info()`, `share()`, and the `check_*()` load-time reports |
+| `viz/overview.py` | `weekly_overview()`, `monthly_overview()` — needs `[viz]` |
+| `viz/wordcloud.py` | `sentiment_wordclouds()`, `distinctive_terms()`, `tfidf_matrix()`, `ramp()` — needs `[viz]` |
+| `viz/style.py` | `apply_style()` — SciencePlots defaults |
+
+See [TUTORIAL.md](TUTORIAL.md) for the full guide.

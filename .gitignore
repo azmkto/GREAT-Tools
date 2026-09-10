@@ -4,3 +4,17 @@ __pycache__/
 build/
 dist/
 .ipynb_checkpoints/
+
+# research data - never commit exports
+*.xlsx
+*.xls
+*.csv
+*.zip
+
+# local envs
+.venv/
+venv/
+.env
+
+# Claude Code worktrees
+.claude/worktrees/
