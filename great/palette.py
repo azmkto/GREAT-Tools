@@ -4,7 +4,7 @@ Moved from `Weekly Monthly Visualization Program/app/config.py` — that content
 already correct, it was just trapped in one project.
 
 `plat_colors` keys are kept in sync with the canonical spelling in
-`riset.labels.plat_class` (`'News'`, `'Threads'`, not the original `'Media
+`great.labels.plat_class` (`'News'`, `'Threads'`, not the original `'Media
 Mainstream'` / `'Thread'`) — see EVALUATION.md section 5.2.
 """
 

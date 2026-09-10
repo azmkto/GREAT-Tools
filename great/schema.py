@@ -21,8 +21,8 @@ def validate_export(df: pd.DataFrame) -> pd.DataFrame:
     """Raise a clear error if `df` doesn't match the expected export shape.
 
     Checks: required columns are present, `Sentiment` values are all in
-    `riset.labels.sent_class` (case-insensitive), and `Media` values are all
-    either in `riset.labels.plat_class` or mappable to it via `MEDIA_MAP`.
+    `great.labels.sent_class` (case-insensitive), and `Media` values are all
+    either in `great.labels.plat_class` or mappable to it via `MEDIA_MAP`.
     Returns `df` unchanged so this can be chained: `df = validate_export(df)`.
     """
     missing = [c for c in EXPORT_COLUMNS if c not in df.columns]
