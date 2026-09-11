@@ -16,6 +16,13 @@ both at once with `pip install -e "<repo>[viz,text]"`.
 
 This subpackage is deliberately not imported by `great/__init__.py`, so `import great`
 still works in a text-only or headless environment without any of the above installed.
+
+`great.viz.environment` (Indonesia choropleth reports) is the one module NOT imported here,
+for the same reason one level down: it needs the `[geo]` extra, and geopandas pulls GDAL/PROJ.
+Importing it here would make `from great.viz import prep` require a geospatial stack. Import
+it directly when you want maps:
+
+    from great.viz.environment import weekly_environment_report, daily_environment_report
 """
 
 from . import checks, prep, style, wordcloud

@@ -7,9 +7,23 @@ copy-pasted between notebooks.
 The common symbols are re-exported here, so the everyday import is flat:
 
     from great import sent_colors, sent_class, MEDIA_MAP, validate_export
+
+`great.text` is re-exported too, which is safe *only* because its heavy dependencies
+(`ftfy`, `nltk`, `Sastrawi`) are imported lazily inside its functions rather than at module
+level. Keep it that way -- a module-level `import ftfy` in `great/text.py` would make
+`import great` fail for anyone without the `[text]` extra.
+
+`great.geo` follows the same rule: `flashtext` is imported on first use, not at import time.
+
+`great.viz` is deliberately **not** re-exported here. It imports matplotlib, scikit-learn,
+wordcloud and (for `great.viz.environment`) geopandas at module level, so pulling it in would
+make `import great` require a full plotting and geospatial stack. Import it directly:
+
+    from great.viz.overview import weekly_overview
+    from great.viz.environment import daily_environment_report
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from .labels import (
     sent_class,
@@ -37,7 +51,16 @@ from .palette import (
 )
 from .schema import EXPORT_COLUMNS, validate_export
 from .issues import ISSUE_RULES, classify_issue
-from .geo import PROVINCE_FIX, PULAU_MAP, ISLAND_ORDER, GEO_FIX
+from .geo import (
+    PROVINCE_FIX,
+    PULAU_MAP,
+    ISLAND_ORDER,
+    ISLAND_FALLBACK,
+    GEO_FIX,
+    LOCATION_TO_PROVINCE,
+    resolve_from_free_text,
+    resolve_from_structured_column,
+)
 
 # --- TEXT CLEANING & SLANG ---
 from .text import (
@@ -51,7 +74,10 @@ from .text import (
 )
 
 # --- ALIAS/BACKWARD COMPATIBILITY ---
-LOCATION_TO_PROVINCE = PROVINCE_FIX
+# `LOCATION_TO_PROVINCE` is imported from .geo above -- it is the free-text gazetteer
+# (572 entries, 'medan' -> 'Sumatera Utara'). It must NOT be aliased to PROVINCE_FIX, which
+# is the 40-entry spelling normaliser ('NTT' -> 'Nusa Tenggara Timur'). The two share no
+# keys, so that alias silently returned a dict in which every gazetteer lookup missed.
 PROVINCE_TO_PULAU = PULAU_MAP
 
 __all__ = [
@@ -69,9 +95,11 @@ __all__ = [
     # issues
     "ISSUE_RULES", "classify_issue",
     # geo
-    "PROVINCE_FIX", "PULAU_MAP", "ISLAND_ORDER", "GEO_FIX",
-    # geo legacy aliases
-    "LOCATION_TO_PROVINCE", "PROVINCE_TO_PULAU",
+    "PROVINCE_FIX", "PULAU_MAP", "ISLAND_ORDER", "ISLAND_FALLBACK", "GEO_FIX",
+    "LOCATION_TO_PROVINCE",
+    "resolve_from_free_text", "resolve_from_structured_column",
+    # geo legacy alias
+    "PROVINCE_TO_PULAU",
     # text
     "SLANG",
     "TOPIC_STOPWORDS_BASE",

@@ -4,12 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "great"
-version = "0.1.0"
+version = "0.2.0"
 description = "Shared utilities for azmkto's social-media research notebooks"
 requires-python = ">=3.11"
 dependencies = [
     "pandas>=2.0",
     "numpy",
+    # great.geo scans free text with flashtext; imported lazily, but the package
+    # is core because great/__init__.py re-exports the resolvers.
+    "flashtext",
 ]
 
 [project.optional-dependencies]
@@ -18,8 +21,12 @@ text = ["ftfy", "nltk", "PySastrawi"]
 # great.viz imports every one of these at import time, so `from great.viz import ...`
 # never needs the notebook to install or import a plotting library itself.
 viz = ["matplotlib", "scienceplots", "wordcloud", "seaborn", "plotly", "great[ml]"]
+# Choropleth maps in great.viz.environment. Kept out of [viz] because geopandas pulls
+# GDAL/PROJ, which is a slow and occasionally fragile install nobody should pay for
+# unless they actually want maps.
+geo = ["geopandas", "shapely", "requests"]
 # Everything. Written as a reference to the other extras so it can't drift out of sync.
-all = ["great[ml,text,viz]"]
+all = ["great[ml,text,viz,geo]"]
 
 [tool.setuptools.packages.find]
 #NEW CODE (Automatically detects all folders & sub-modules within 'great')

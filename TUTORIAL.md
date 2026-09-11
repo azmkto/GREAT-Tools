@@ -65,6 +65,7 @@ the entire update procedure**; there is no reinstall step.
 | `text` | `ftfy`, `nltk`, `PySastrawi` | the `great.text` cleaners |
 | `ml` | `scikit-learn` | the TF-IDF behind the word cloud |
 | `viz` | `matplotlib`, `scienceplots`, `wordcloud`, `seaborn`, `plotly`, plus `ml` | all of `great.viz` |
+| `geo` | `geopandas`, `shapely`, `requests` | `great.viz.environment` — the Indonesia choropleth reports |
 | `all` | everything above | everything |
 
 `great.viz` imports its dependencies at module level, so `[viz]` is not optional if you want
@@ -360,11 +361,12 @@ this conversation, or the pattern in `great/palette.py` + `wordcloud`'s
 | `great.schema` | `EXPORT_COLUMNS`, the 13-column export shape | `validate_export(df)` |
 | `great.text` | `SLANG` dict, stopword-aware cleaners | `clean_for_bert(text)`, `clean_for_topics(text, extra_stopwords=None)` |
 | `great.issues` | Environmental-issue keyword rules | `classify_issue(text)` |
-| `great.geo` | Province name fixes, province→island mapping | `PROVINCE_FIX`, `PULAU_MAP`, `GEO_FIX`, `ISLAND_ORDER` |
+| `great.geo` | 572-entry location gazetteer, province fixes, province→island mapping | `resolve_from_free_text(text)`, `resolve_from_structured_column(value)`, `LOCATION_TO_PROVINCE`, `PROVINCE_FIX`, `PULAU_MAP`, `GEO_FIX`, `ISLAND_ORDER` |
 | `great.viz.prep` | Reshapes a raw export into the frames the plots consume | `prepare_data(df)`, `sentiment_data(df)`, `platform_data(df)`, `plat_sent_data(df)` |
 | `great.viz.checks` | Load-time reports (they print, never raise) | `frame_info(obj, label)`, `share(series, top=None)`, `check_completeness/coverage/composition/labels(df)` |
 | `great.viz.overview` | The sentiment/platform overview figure | `weekly_overview(...)`, `monthly_overview(..., interval)` |
 | `great.viz.wordcloud` | Sentiment word clouds from distinctive TF-IDF terms | `sentiment_wordclouds(df)`, `prepare_corpus(df)`, `tfidf_matrix(texts)`, `distinctive_terms(X, terms, mask)`, `ramp(hex)` |
+| `great.viz.environment` | Indonesia choropleth reports for environmental issues | `weekly_environment_report(df, start, end)`, `daily_environment_report(...)`, `province_counts(df)`, `island_counts(df)`; both reports take `badge_size` for the map count labels |
 | `great.viz.style` | Shared SciencePlots figure defaults | `apply_style(dpi=500)` |
 
 Two things worth knowing before you use them:
@@ -537,6 +539,8 @@ Two notebooks in this repo exist purely to demonstrate the library end to end:
 |---|---|
 | `Weekly Visualization/example_weekly_with_great.ipynb` | The full flow with every argument passed explicitly |
 | `Monthly Visualization/example_monthly_with_great.ipynb` | The same flow leaning on the library defaults, plus the trend panel's `interval` |
+| `Environment Visualization/example_env_weekly.ipynb` | The environment report: Indonesia choropleth + one issue bar chart |
+| `Environment Visualization/example_env_daily.ipynb` | The same, plus a per-island bar chart and a map colorbar |
 
 Both run top to bottom unattended against the export files, which live outside this repo
 (see the `DATA` cell near the top of each notebook, and `.gitignore` — exports are never

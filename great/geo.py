@@ -15,7 +15,16 @@ documents that fell through to "Tidak Terdeteksi" (see EVALUATION.md).
 """
 import re
 import numpy as np
-from flashtext import KeywordProcessor
+
+# `flashtext` is imported lazily inside `_get_location_kp()`, not here. It is a hard
+# dependency of this module's free-text scan, but `great/__init__.py` imports this module,
+# so a module-level import would make a missing flashtext break `import great` entirely --
+# including for people who only want the palette or the label vocabularies.
+#
+# Note flashtext 2.7 is from February 2018 and declares support only for Python 2.7/3.5/3.6.
+# It is pure Python so it still runs, but it is unmaintained. If it ever breaks, the scan can
+# be rebuilt as one alternation regex, the way `great/issues.py` and `great/text.py`'s
+# `SLANG_PATTERN` already work.
 
 # =========================================================
 # STAGE 1 DATA: free-text location gazetteer
@@ -434,13 +443,37 @@ GEO_FIX = {
 }
 
 # =========================================================
-# BUILT ONCE AT IMPORT TIME
+# BUILT ONCE, ON FIRST USE
 # =========================================================
-_LOCATION_KP = KeywordProcessor(case_sensitive=False)
-for _loc in LOCATION_TO_PROVINCE:
-    _LOCATION_KP.add_keyword(_loc)
-
+# 11 stdlib patterns, so these are cheap enough to build eagerly.
 _ISLAND_PATTERNS = {k: re.compile(rf'\b{re.escape(k)}\b') for k in ISLAND_FALLBACK}
+
+_location_kp_cache = None  # lazily built, cached
+
+
+def _get_location_kp():
+    """The gazetteer keyword scanner, built once on first use.
+
+    Lazy for two reasons: it keeps the `flashtext` import off the `import great` path
+    (see the note at the top of this module), and it avoids loading ~570 keywords into a
+    trie for anyone who never resolves a location.
+
+    Raises ImportError with an actionable message if flashtext is missing.
+    """
+    global _location_kp_cache
+    if _location_kp_cache is None:
+        try:
+            from flashtext import KeywordProcessor
+        except ImportError as exc:
+            raise ImportError(
+                'resolving locations from free text needs flashtext. '
+                'Install it with: pip install flashtext'
+            ) from exc
+        kp = KeywordProcessor(case_sensitive=False)
+        for loc in LOCATION_TO_PROVINCE:
+            kp.add_keyword(loc)
+        _location_kp_cache = kp
+    return _location_kp_cache
 
 
 # =========================================================
@@ -471,7 +504,7 @@ def resolve_from_free_text(text: str) -> tuple:
     atau ("Provinsi Tidak Spesifik", <pulau>) kalau cuma pulau yang disebut.
     """
     text_lower = str(text).lower()
-    found = _LOCATION_KP.extract_keywords(text_lower)
+    found = _get_location_kp().extract_keywords(text_lower)
 
     if found:
         counts = {}
