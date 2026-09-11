@@ -7,15 +7,6 @@ copy-pasted between notebooks.
 The common symbols are re-exported here, so the everyday import is flat:
 
     from great import sent_colors, sent_class, MEDIA_MAP, validate_export
-
-Two things are deliberately *not* re-exported:
-
-* `great.text` — it lazily imports `ftfy`/`nltk`/`Sastrawi` inside its functions so the
-  core package stays usable without them. Importing it here would defeat that.
-  Use `from great.text import clean_for_topics`.
-* `great.viz` — it needs `matplotlib`/`scienceplots` (the `[viz]` extra). Keeping it out
-  means `import great` still works in a text-only or headless environment.
-  Use `from great.viz.overview import weekly_overview`.
 """
 
 __version__ = "0.1.0"
@@ -48,8 +39,18 @@ from .schema import EXPORT_COLUMNS, validate_export
 from .issues import ISSUE_RULES, classify_issue
 from .geo import PROVINCE_FIX, PULAU_MAP, ISLAND_ORDER, GEO_FIX
 
-# --- ALIAS/BACKWARD COMPATIBILITY (DITAMBAHKAN) ---
-# Menghubungkan nama variabel lama di notebook legacy ke variabel baru di package:
+# --- TEXT CLEANING & SLANG ---
+from .text import (
+    SLANG,
+    TOPIC_STOPWORDS_BASE,
+    WORDCLOUD_STOPWORDS_EXTRA,
+    normalize_slang,
+    clean_for_bert,
+    clean_for_topics,
+    clean_for_wordcloud,
+)
+
+# --- ALIAS/BACKWARD COMPATIBILITY ---
 LOCATION_TO_PROVINCE = PROVINCE_FIX
 PROVINCE_TO_PULAU = PULAU_MAP
 
@@ -71,4 +72,12 @@ __all__ = [
     "PROVINCE_FIX", "PULAU_MAP", "ISLAND_ORDER", "GEO_FIX",
     # geo legacy aliases
     "LOCATION_TO_PROVINCE", "PROVINCE_TO_PULAU",
+    # text
+    "SLANG",
+    "TOPIC_STOPWORDS_BASE",
+    "WORDCLOUD_STOPWORDS_EXTRA",
+    "normalize_slang",
+    "clean_for_bert",
+    "clean_for_topics",
+    "clean_for_wordcloud",
 ]
