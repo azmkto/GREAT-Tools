@@ -23,7 +23,8 @@ Once installed, `import great` works from **any** notebook in any folder on your
 no `sys.path` code needed, and `git pull` is the whole update procedure.
 
 `[all]` pulls every extra. To be selective: `text` (ftfy, nltk, PySastrawi), `ml`
-(scikit-learn), `viz` (matplotlib, scienceplots, wordcloud, seaborn, plotly — and `ml`).
+(scikit-learn), `viz` (matplotlib, scienceplots, wordcloud, seaborn, plotly — and `ml`),
+`geo` (geopandas, shapely, requests — for the Indonesia choropleth reports).
 `great.viz` imports its dependencies at module level, so `[viz]` is required for any plotting;
 plain `import great` needs none of them.
 
@@ -41,6 +42,7 @@ See [TUTORIAL.md §1](TUTORIAL.md) for all three environments and private-repo a
 |---|---|
 | [TUTORIAL.md](TUTORIAL.md) | Installing and using the library — local, VS Code + Colab extension, and Colab |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | For collaborators: getting the latest, and getting your changes in |
+| [CHANGELOG.md](CHANGELOG.md) | What changed in each version, and what it breaks |
 
 ## Use
 
@@ -78,11 +80,12 @@ and
 | `schema.py` | The canonical 13-column export schema and `validate_export()` |
 | `text.py` | `SLANG`, stopword sets, `clean_for_bert()`, `clean_for_topics()` — needs `[text]` |
 | `issues.py` | Environmental issue keyword rules and `classify_issue()` |
-| `geo.py` | Province name fixes and province→island mapping |
+| `geo.py` | 572-entry location gazetteer, `resolve_from_free_text()`, province fixes, province→island mapping |
 | `viz/prep.py` | `prepare_data()`, `sentiment_data()`, `platform_data()`, `plat_sent_data()` |
 | `viz/checks.py` | `frame_info()`, `share()`, and the `check_*()` load-time reports |
 | `viz/overview.py` | `weekly_overview()`, `monthly_overview()` — needs `[viz]` |
 | `viz/wordcloud.py` | `sentiment_wordclouds()`, `distinctive_terms()`, `tfidf_matrix()`, `ramp()` — needs `[viz]` |
+| `viz/environment.py` | `weekly_environment_report()`, `daily_environment_report()`, `province_counts()`, `island_counts()` — needs `[geo]` |
 | `viz/style.py` | `apply_style()` — SciencePlots defaults |
 
 See [TUTORIAL.md](TUTORIAL.md) for the full guide.

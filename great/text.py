@@ -62,7 +62,7 @@ SLANG = {
     # Truth & reality
     "trnyata": "ternyata", "ternyta": "ternyata",
     "sbnrnya": "sebenarnya", "sebenernya": "sebenarnya", "sbnernya": "sebenarnya",
-    "bener": "benar", "beneran": "benaran",
+    "bener": "benar", "beneran": "benar",
     # Connectives
     "sbg": "sebagai", "sbgai": "sebagai", "trhdp": "terhadap", "thd": "terhadap", "thdp": "terhadap",
     "diantaranya": "di antaranya", "diantara": "di antara", "meski": "meskipun", "jgnkan": "jangankan",
