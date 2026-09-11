@@ -16,14 +16,11 @@ dependencies = [
 ml = ["scikit-learn"]
 text = ["ftfy", "nltk", "PySastrawi"]
 # great.viz imports every one of these at import time, so `from great.viz import ...`
-# never needs the notebook to install or import a plotting library itself. That includes
-# scikit-learn: great/viz/wordcloud.py imports TfidfVectorizer at module level and
-# great/viz/__init__.py imports that module, so `[viz]` without `great[ml]` would make
-# even `from great.viz import prep` raise ModuleNotFoundError.
+# never needs the notebook to install or import a plotting library itself.
 viz = ["matplotlib", "scienceplots", "wordcloud", "seaborn", "plotly", "great[ml]"]
-# Everything. Written as a reference to the other extras so it can't drift out of sync
-# when one of them gains a dependency.
+# Everything. Written as a reference to the other extras so it can't drift out of sync.
 all = ["great[ml,text,viz]"]
 
-[tool.setuptools]
-packages = ["great", "great.viz"]
+[tool.setuptools.packages.find]
+#NEW CODE (Automatically detects all folders & sub-modules within 'great')
+where = ["."]
