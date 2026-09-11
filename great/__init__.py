@@ -48,6 +48,11 @@ from .schema import EXPORT_COLUMNS, validate_export
 from .issues import ISSUE_RULES, classify_issue
 from .geo import PROVINCE_FIX, PULAU_MAP, ISLAND_ORDER, GEO_FIX
 
+# --- ALIAS/BACKWARD COMPATIBILITY (DITAMBAHKAN) ---
+# Menghubungkan nama variabel lama di notebook legacy ke variabel baru di package:
+LOCATION_TO_PROVINCE = PROVINCE_FIX
+PROVINCE_TO_PULAU = PULAU_MAP
+
 __all__ = [
     "__version__",
     # labels
@@ -64,4 +69,6 @@ __all__ = [
     "ISSUE_RULES", "classify_issue",
     # geo
     "PROVINCE_FIX", "PULAU_MAP", "ISLAND_ORDER", "GEO_FIX",
+    # geo legacy aliases
+    "LOCATION_TO_PROVINCE", "PROVINCE_TO_PULAU",
 ]
