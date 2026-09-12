@@ -361,7 +361,7 @@ this conversation, or the pattern in `great/palette.py` + `wordcloud`'s
 | `great.schema` | `EXPORT_COLUMNS`, the 13-column export shape | `validate_export(df)` |
 | `great.text` | `SLANG` dict, stopword-aware cleaners | `clean_for_bert(text)`, `clean_for_topics(text, extra_stopwords=None)` |
 | `great.issues` | Environmental-issue keyword rules | `classify_issue(text)` |
-| `great.geo` | 572-entry location gazetteer, province fixes, province→island mapping | `resolve_province(location, text)`, `resolve_province_frame(df)`, `resolve_from_free_text(text)`, `resolve_from_structured_column(value)`, `is_known_province(value)`, `LOCATION_TO_PROVINCE`, `PROVINCE_FIX`, `PULAU_MAP`, `GEO_FIX`, `ISLAND_ORDER` |
+| `great.geo` | 1,243-entry location gazetteer on official BPS codes, province fixes, province→island mapping | `resolve(location, text)`, `resolve_frame(df)`, `is_known_province(value)`, `LOCATION_TO_PROVINCE`, `AMBIGUOUS_REGIONS`, `PROVINCE_FIX`, `PULAU_MAP`, `GEO_FIX`, `ISLAND_ORDER` |
 | `great.viz.prep` | Reshapes a raw export into the frames the plots consume | `prepare_data(df)`, `sentiment_data(df)`, `platform_data(df)`, `plat_sent_data(df)` |
 | `great.viz.checks` | Load-time reports (they print, never raise) | `frame_info(obj, label)`, `share(series, top=None)`, `check_completeness/coverage/composition/labels(df)` |
 | `great.viz.overview` | The sentiment/platform overview figure | `weekly_overview(...)`, `monthly_overview(..., interval)` |

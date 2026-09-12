@@ -10,8 +10,7 @@ two public functions just arrange them:
     env_two_bar    map + 2 bar charts         figsize (30, 14)
 
 Both expect a frame with `Provinsi` and `Isu_Inti` columns. Neither is in a raw export --
-derive them first with `great.classify_issue()` and `great.resolve_from_free_text()` /
-`great.resolve_from_structured_column()`.
+derive them first with `great.classify_issue()` and `great.resolve_frame()`.
 
 Needs the `[geo]` extra: `geopandas`, `shapely`, `requests`. This module is deliberately not
 imported by `great/viz/__init__.py`, so `from great.viz import prep` does not drag in GDAL.
@@ -26,7 +25,14 @@ import requests
 from shapely.geometry import MultiPolygon
 
 from .. import palette
-from ..geo import GEO_FIX, ISLAND_ORDER, PROVINCE_FIX, PULAU_MAP
+from ..geo import (
+    GEO_FIX,
+    ISLAND_ORDER,
+    KNOWN_PROVINCES,
+    PROVINCE_FIX,
+    PULAU_MAP,
+    _canonicalize,
+)
 
 __all__ = [
     "load_indonesia_geojson", "province_counts", "island_counts",
@@ -67,8 +73,8 @@ _UNKNOWN = "TIDAK DIKETAHUI"
 def _build_ci_map(mapping):
     """Uppercase, whitespace-collapsed version of a province mapping.
 
-    The data and the GeoJSON spell provinces differently from each other *and* from
-    `great.geo`'s canonical Title Case, so everything is compared in uppercase.
+    Only the GeoJSON side still needs this. The data side goes through
+    `great.geo`'s own normaliser, which has handled case since 0.3.0.
     Non-string values (the `np.nan` entries in `PROVINCE_FIX`) pass through untouched.
     """
     out = {}
@@ -78,25 +84,38 @@ def _build_ci_map(mapping):
     return out
 
 
-_PROVINCE_FIX_CI = _build_ci_map(PROVINCE_FIX)   # for the data's "Provinsi" column
-_GEO_FIX_CI = _build_ci_map(GEO_FIX)             # for the GeoJSON's province column
-# PULAU_MAP keys are Title Case; normalisation below always yields uppercase. Values stay as
+_GEO_FIX_CI = _build_ci_map(GEO_FIX)   # for the GeoJSON's province column
+
+# PULAU_MAP keys are Title Case; the normalisers below return uppercase. Values stay as
 # written because they are used as bar-chart labels.
 _PULAU_MAP_CI = {str(k).strip().upper(): v for k, v in PULAU_MAP.items()}
 
 
 def _normalize_data_name(name):
-    """Normalise a province name coming from the export/survey data."""
-    key = " ".join(str(name).strip().upper().split())
-    fixed = _PROVINCE_FIX_CI.get(key, key)
-    return _UNKNOWN if pd.isna(fixed) else fixed
+    """Canonical province name for a value coming from the export data.
+
+    Delegates to `great.geo`, so there is one definition of what a province is called.
+    Falls back to the uppercase form when the value is not a province at all, which keeps
+    unresolved values ("Tidak Terdeteksi") distinguishable in the join.
+    """
+    canonical = _canonicalize(name)
+    if canonical in KNOWN_PROVINCES:
+        return canonical.upper()
+    return " ".join(str(name).strip().upper().split())
 
 
 def _normalize_geo_name(name):
-    """Normalise a province name coming from the GeoJSON."""
+    """Normalise a province name coming from the GeoJSON.
+
+    Kept separate from the data side: the upstream GeoJSON spells several provinces its own
+    way ("Daerah Istimewa Yogyakarta"), which is what `GEO_FIX` exists to absorb.
+    """
     key = " ".join(str(name).strip().upper().split())
     fixed = _GEO_FIX_CI.get(key, key)
-    return _UNKNOWN if pd.isna(fixed) else fixed
+    if pd.isna(fixed):
+        return _UNKNOWN
+    canonical = _canonicalize(fixed)
+    return canonical.upper() if canonical in KNOWN_PROVINCES else key
 
 
 def _detect_province_column(map_gdf):

@@ -80,7 +80,7 @@ and
 | `schema.py` | The canonical 13-column export schema and `validate_export()` |
 | `text.py` | `SLANG`, stopword sets, `clean_for_bert()`, `clean_for_topics()` — needs `[text]` |
 | `issues.py` | Environmental issue keyword rules and `classify_issue()` |
-| `geo.py` | 572-entry location gazetteer, `resolve_province()`, `resolve_province_frame()`, `resolve_from_free_text()`, province fixes, province→island mapping |
+| `geo.py` | 1,243-entry gazetteer on official BPS codes, `resolve()`, `resolve_frame()`, province fixes, province→island mapping |
 | `viz/prep.py` | `prepare_data()`, `sentiment_data()`, `platform_data()`, `plat_sent_data()` |
 | `viz/checks.py` | `frame_info()`, `share()`, and the `check_*()` load-time reports |
 | `viz/overview.py` | `weekly_overview()`, `monthly_overview()` — needs `[viz]` |

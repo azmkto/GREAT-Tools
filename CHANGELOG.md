@@ -3,6 +3,55 @@
 Notable changes to `great`. Versions are tagged in git, so a notebook can pin a known-good
 one — see [TUTORIAL.md §4](TUTORIAL.md) for the pinned-install syntax.
 
+## 0.3.0
+
+Region mapping rebuilt on the official BPS region-code list (38 provinces, 514 kabupaten/kota),
+merged into the hand-built gazetteer rather than replacing it.
+
+### Added
+
+- **`tools/build_regions.py` and `great/_regions.py`.** The generator reads the BPS CSV and
+  emits plain dict literals, so the data is greppable and diffable and costs no import-time
+  file IO. Re-run it when BPS publishes an update.
+- **`AMBIGUOUS_REGIONS`** — names that mean different places depending on context.
+  `sungai kapuas` → Kalimantan Barat but bare `kapuas` → Kalimantan Tengah (Kab. Kapuas is
+  62.03); `kota banjar` → Jawa Barat but bare `banjar` → Kalimantan Selatan. Every other
+  landmark whose bare name is also a kabupaten (`danau toba`, `sungai siak`, `gunung kerinci`,
+  `danau kerinci`, `danau poso`) agrees with the official list, so the table has two entries.
+- **`COMMON_WORD_REGIONS`** — region names that are also ordinary Indonesian words and so must
+  not match bare. One member: `puncak` ("peak") matched 2.4% of all documents and sent Jakarta
+  articles about *puncak El Niño* to Papua Tengah. Still reachable as `kab. puncak`.
+
+### Changed
+
+- **`resolve()` now prefers article text over the structured `Location` column.** Measured on
+  25k rows, the two disagree **74%** of the time, and `Location` is the author's or outlet's
+  location — `Jakarta` on an article about fires in Kalimantan. For a map of where issues are
+  *happening*, the text is the right signal; `Location` is now the fallback for rows the text
+  cannot place. Total hit rate is unchanged by this; the cases simply land in the right province.
+- **`PULAU_MAP` is 38 provinces, not 41.** `Maluku Tengah` (kabupaten 81.01) and
+  `Maluku Selatan` were never provinces and are now gazetteer entries pointing at `Maluku`;
+  `Daerah Istimewa Yogyakarta` was a duplicate of `DI Yogyakarta` and stays an alias in
+  `PROVINCE_FIX`/`GEO_FIX`. `KNOWN_PROVINCES` finally means what its name says.
+- **Matching is case-, whitespace- and punctuation-insensitive.** Previously lowercase worked
+  for only 7 of 41 provinces, because `PROVINCE_FIX` had grown ad-hoc lowercase keys for some
+  and not others. All 38 now resolve from any casing, and the values real exports contain —
+  `Kota Bandung\, Jawa Barat`, `Trenggalek\, Indonesia`, `KAB. ACEH SINGKIL` — resolve too.
+- **Three outdated mappings corrected** from the official list: `puncak jaya` → Papua Tengah
+  and `raja ampat` → Papua Barat Daya (both predated the 2022 Papua split), `kapuas` →
+  Kalimantan Tengah.
+- **`resolve_frame()` is ~3.3x faster** (2,800 → 9,300 rows/sec). Roughly half the rows in a
+  real export repeat text verbatim — retweets and syndicated copy — so each distinct text is
+  scanned once.
+- Hit rate improved with **zero rows lost**: 63.5% → 67.2% on `test_data.xlsx`, 67.8% → 70.3%
+  on `test_data_2.xlsx`. Map coverage 33 → 34 of 38 provinces.
+
+### Removed
+
+Breaking. `resolve_from_free_text`, `resolve_from_structured_column`, `resolve_province` and
+`resolve_province_frame` are gone, with no aliases. Replace all four with `resolve()` for a
+single value or `resolve_frame()` for a DataFrame.
+
 ## 0.2.1
 
 ### Added
