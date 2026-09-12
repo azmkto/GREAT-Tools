@@ -245,9 +245,14 @@ def _main_point(geometry):
 # PANELS
 # =========================================================
 def _panel_choropleth(ax, map_gdf, prov_col, title, *, colorbar=False,
-                      proportional_badges=False, missing_color="#ffffe0",
-                      badge_size=18, badge_growth=5, fit_bounds=False, title_size=None):
-    """The Indonesia map, shaded by case count, with a numbered badge per active province."""
+                      missing_color="#ffffe0", badge_size=18, badge_growth=0,
+                      fit_bounds=False, title_size=None):
+    """The Indonesia map, shaded by case count, with a numbered badge per active province.
+
+    `badge_growth` is how many points the busiest province's badge gains over the quietest;
+    0 means every badge is the same size. It replaces a separate `proportional_badges` flag,
+    which only ever meant "is badge_growth non-zero".
+    """
     title_size = palette.TITLE_SIZE if title_size is None else title_size
 
     legend_kwds = ({"label": "Jumlah kasus/isu", "shrink": 0.55, "pad": 0.02}
@@ -279,19 +284,19 @@ def _panel_choropleth(ax, map_gdf, prov_col, title, *, colorbar=False,
             point = _main_point(row.geometry)
             x, y = point.x, point.y
 
-        if proportional_badges:
+        if badge_growth:
             # sqrt so the badge area, not the radius, tracks the count. badge_size is the
             # floor; the busiest province lands at badge_size + badge_growth.
             size = badge_size + (value / max_value) ** 0.5 * badge_growth
-            pad = 0.3
+            pad, edge = 0.3, 0.6
         else:
-            size, pad = badge_size, 0.25
+            size, pad, edge = badge_size, 0.25, 0.8
 
         ax.text(
             x, y, f"{int(value)}", ha="center", va="center", zorder=10,
             fontsize=size, fontweight="bold", color="black",
             bbox=dict(boxstyle=f"circle,pad={pad}", facecolor="white",
-                      edgecolor="black", linewidth=0.8 if not proportional_badges else 0.6),
+                      edgecolor="black", linewidth=edge),
         )
 
     ax.set_title(title, fontsize=title_size, fontweight="bold", pad=20)
@@ -343,18 +348,21 @@ def _period(start_date, end_date):
 # REPORTS
 # =========================================================
 def env_one_bar(data, start_date, end_date, *, province_col="Provinsi",
-                              issue_col="Isu_Inti", badge_size=18, show=True):
+                issue_col="Isu_Inti", badge_size=18, badge_growth=0, show=True):
     """Map plus one bar chart: where the issues are, and which issues they are.
 
     Parameters
     ----------
     data : frame with `province_col` and `issue_col`; see the module docstring for deriving them.
     start_date, end_date : pre-formatted period labels, e.g. from `great.viz.prep.prepare_data`.
-    badge_size : font size of the count label inside each province's badge. Every badge in
-        this report is the same size, so this is exactly the size you get. The white circle
-        is drawn in units of font size, so it scales with the number -- but past roughly 25
-        the hand-placed badges for Kepulauan Riau, Bali and Nusa Tenggara Barat start
-        crowding their neighbours.
+    badge_size : font size of the count label inside each province's badge. With the default
+        `badge_growth=0` every badge is this size exactly. The white circle is drawn in units
+        of font size so it scales with the number -- but past roughly 25 the hand-placed
+        badges for Kepulauan Riau, Bali and Nusa Tenggara Barat start crowding their
+        neighbours.
+    badge_growth : points the busiest province's badge gains over the quietest. 0 (the
+        default here) keeps every badge the same size, which is how this report has always
+        looked; set it to 5 to match `env_two_bar`.
     show : call `plt.show()` before returning.
 
     Returns the Figure.
@@ -367,8 +375,8 @@ def env_one_bar(data, start_date, end_date, *, province_col="Provinsi",
     _panel_choropleth(
         ax_map, map_gdf, prov_col,
         f"Persebaran Isu Lingkungan di Indonesia\n{_period(start_date, end_date)}",
-        colorbar=False, proportional_badges=False, missing_color="#ffffe0",
-        badge_size=badge_size, title_size=26,
+        colorbar=False, missing_color="#ffffe0",
+        badge_size=badge_size, badge_growth=badge_growth, title_size=26,
     )
 
     counts = data[issue_col].value_counts().sort_values(ascending=True)
@@ -392,11 +400,12 @@ def env_two_bar(data, start_date, end_date, *, province_col="Provinsi",
     Same arguments as `env_one_bar`, plus:
 
     island_order : 'count' (largest bar on top) or 'geographic' (west to east, matching
-        `great.geo.ISLAND_ORDER`, so the chart reads in the same order as the map).
-    badge_size : here badges scale with the count, so this is the size of the *smallest*
-        badge, not a fixed size. The largest province gets `badge_size + badge_growth`.
-    badge_growth : how many points the busiest province's badge gains over the quietest.
-        Set it to 0 for uniform badges like the weekly report's.
+        `great.geo.ISLAND_ORDER`, so the chart reads in the same order as the map). Only this
+        report has an island chart, which is why only this report takes the argument.
+    badge_size : with the default `badge_growth=5` badges scale with the count, so this is
+        the size of the *smallest* badge rather than a fixed size.
+    badge_growth : points the busiest province's badge gains over the quietest. 0 gives
+        uniform badges, matching `env_one_bar`'s default.
 
     Returns the Figure.
     """
@@ -411,7 +420,7 @@ def env_two_bar(data, start_date, end_date, *, province_col="Provinsi",
     map_gdf, prov_col = _map_with_counts(data, province_col)
     _panel_choropleth(
         ax_map, map_gdf, prov_col, "Persebaran Isu Lingkungan di Indonesia",
-        colorbar=True, proportional_badges=True, missing_color="#d9d9d9",
+        colorbar=True, missing_color="#d9d9d9",
         badge_size=badge_size, badge_growth=badge_growth, fit_bounds=True, title_size=20,
     )
 
