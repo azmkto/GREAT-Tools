@@ -20,10 +20,10 @@ wordcloud and (for `great.viz.environment`) geopandas at module level, so pullin
 make `import great` require a full plotting and geospatial stack. Import it directly:
 
     from great.viz.overview import weekly_overview
-    from great.viz.environment import daily_environment_report
+    from great.viz.environment import env_two_bar
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 from .labels import (
     sent_class,
@@ -58,6 +58,10 @@ from .geo import (
     ISLAND_FALLBACK,
     GEO_FIX,
     LOCATION_TO_PROVINCE,
+    KNOWN_PROVINCES,
+    is_known_province,
+    resolve_province,
+    resolve_province_frame,
     resolve_from_free_text,
     resolve_from_structured_column,
 )
@@ -98,6 +102,7 @@ __all__ = [
     "PROVINCE_FIX", "PULAU_MAP", "ISLAND_ORDER", "ISLAND_FALLBACK", "GEO_FIX",
     "LOCATION_TO_PROVINCE",
     "resolve_from_free_text", "resolve_from_structured_column",
+    "resolve_province", "resolve_province_frame", "is_known_province", "KNOWN_PROVINCES",
     # geo legacy alias
     "PROVINCE_TO_PULAU",
     # text
