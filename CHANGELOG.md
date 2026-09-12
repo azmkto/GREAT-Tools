@@ -3,6 +3,26 @@
 Notable changes to `great`. Versions are tagged in git, so a notebook can pin a known-good
 one — see [TUTORIAL.md §4](TUTORIAL.md) for the pinned-install syntax.
 
+## 0.3.1
+
+### Changed
+
+- **`env_one_bar()` now takes `badge_growth` too.** Both reports draw the same map through the
+  same panel helper, but only `env_two_bar()` exposed the control, so a styling choice
+  inherited from the source notebook — weekly used flat badges, daily used scaled ones — had
+  hardened into a capability difference in the API. The two functions should differ in what
+  they *draw*, not in what you can *ask for*.
+
+  Defaults are unchanged: `env_one_bar` defaults to `badge_growth=0` (flat 18pt badges, edge
+  0.8) and `env_two_bar` to `badge_growth=5` (18.4→23pt, edge 0.6), so every existing call
+  renders exactly as before.
+
+  `island_order` stays on `env_two_bar` alone, which is the justified asymmetry — `env_one_bar`
+  has no island chart for it to order.
+
+- The private `_panel_choropleth()` lost its `proportional_badges` flag; it only ever meant
+  "is `badge_growth` non-zero", so the flag and the number could disagree.
+
 ## 0.3.0
 
 Region mapping rebuilt on the official BPS region-code list (38 provinces, 514 kabupaten/kota),
