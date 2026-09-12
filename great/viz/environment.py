@@ -6,8 +6,8 @@ choropleth and the same style of horizontal bar chart; they differ only in layou
 handful of styling parameters, so the panels live in the private `_panel_*` helpers and the
 two public functions just arrange them:
 
-    weekly_environment_report   map + 1 bar chart          figsize (38, 9)
-    daily_environment_report    map + 2 bar charts         figsize (30, 14)
+    env_one_bar   map + 1 bar chart          figsize (38, 9)
+    env_two_bar    map + 2 bar charts         figsize (30, 14)
 
 Both expect a frame with `Provinsi` and `Isu_Inti` columns. Neither is in a raw export --
 derive them first with `great.classify_issue()` and `great.resolve_from_free_text()` /
@@ -30,7 +30,7 @@ from ..geo import GEO_FIX, ISLAND_ORDER, PROVINCE_FIX, PULAU_MAP
 
 __all__ = [
     "load_indonesia_geojson", "province_counts", "island_counts",
-    "weekly_environment_report", "daily_environment_report",
+    "env_one_bar", "env_two_bar",
 ]
 
 # The upstream province boundaries. Third party -- a network call happens on first use, and
@@ -323,7 +323,7 @@ def _period(start_date, end_date):
 # =========================================================
 # REPORTS
 # =========================================================
-def weekly_environment_report(data, start_date, end_date, *, province_col="Provinsi",
+def env_one_bar(data, start_date, end_date, *, province_col="Provinsi",
                               issue_col="Isu_Inti", badge_size=18, show=True):
     """Map plus one bar chart: where the issues are, and which issues they are.
 
@@ -365,12 +365,12 @@ def weekly_environment_report(data, start_date, end_date, *, province_col="Provi
     return fig
 
 
-def daily_environment_report(data, start_date, end_date, *, province_col="Provinsi",
+def env_two_bar(data, start_date, end_date, *, province_col="Provinsi",
                              issue_col="Isu_Inti", island_order="count",
                              badge_size=18, badge_growth=5, show=True):
     """Map plus two stacked bar charts: issues nationally, and cases per island.
 
-    Same arguments as `weekly_environment_report`, plus:
+    Same arguments as `env_one_bar`, plus:
 
     island_order : 'count' (largest bar on top) or 'geographic' (west to east, matching
         `great.geo.ISLAND_ORDER`, so the chart reads in the same order as the map).

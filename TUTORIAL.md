@@ -361,12 +361,12 @@ this conversation, or the pattern in `great/palette.py` + `wordcloud`'s
 | `great.schema` | `EXPORT_COLUMNS`, the 13-column export shape | `validate_export(df)` |
 | `great.text` | `SLANG` dict, stopword-aware cleaners | `clean_for_bert(text)`, `clean_for_topics(text, extra_stopwords=None)` |
 | `great.issues` | Environmental-issue keyword rules | `classify_issue(text)` |
-| `great.geo` | 572-entry location gazetteer, province fixes, province→island mapping | `resolve_from_free_text(text)`, `resolve_from_structured_column(value)`, `LOCATION_TO_PROVINCE`, `PROVINCE_FIX`, `PULAU_MAP`, `GEO_FIX`, `ISLAND_ORDER` |
+| `great.geo` | 572-entry location gazetteer, province fixes, province→island mapping | `resolve_province(location, text)`, `resolve_province_frame(df)`, `resolve_from_free_text(text)`, `resolve_from_structured_column(value)`, `is_known_province(value)`, `LOCATION_TO_PROVINCE`, `PROVINCE_FIX`, `PULAU_MAP`, `GEO_FIX`, `ISLAND_ORDER` |
 | `great.viz.prep` | Reshapes a raw export into the frames the plots consume | `prepare_data(df)`, `sentiment_data(df)`, `platform_data(df)`, `plat_sent_data(df)` |
 | `great.viz.checks` | Load-time reports (they print, never raise) | `frame_info(obj, label)`, `share(series, top=None)`, `check_completeness/coverage/composition/labels(df)` |
 | `great.viz.overview` | The sentiment/platform overview figure | `weekly_overview(...)`, `monthly_overview(..., interval)` |
 | `great.viz.wordcloud` | Sentiment word clouds from distinctive TF-IDF terms | `sentiment_wordclouds(df)`, `prepare_corpus(df)`, `tfidf_matrix(texts)`, `distinctive_terms(X, terms, mask)`, `ramp(hex)` |
-| `great.viz.environment` | Indonesia choropleth reports for environmental issues | `weekly_environment_report(df, start, end)`, `daily_environment_report(...)`, `province_counts(df)`, `island_counts(df)`; both reports take `badge_size` for the map count labels |
+| `great.viz.environment` | Indonesia choropleth reports for environmental issues | `env_one_bar(df, start, end)`, `env_two_bar(...)`, `province_counts(df)`, `island_counts(df)`; both reports take `badge_size` for the map count labels |
 | `great.viz.style` | Shared SciencePlots figure defaults | `apply_style(dpi=500)` |
 
 Two things worth knowing before you use them:

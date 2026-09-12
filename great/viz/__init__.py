@@ -22,7 +22,7 @@ for the same reason one level down: it needs the `[geo]` extra, and geopandas pu
 Importing it here would make `from great.viz import prep` require a geospatial stack. Import
 it directly when you want maps:
 
-    from great.viz.environment import weekly_environment_report, daily_environment_report
+    from great.viz.environment import env_one_bar, env_two_bar
 """
 
 from . import checks, prep, style, wordcloud

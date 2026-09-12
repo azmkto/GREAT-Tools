@@ -3,6 +3,28 @@
 Notable changes to `great`. Versions are tagged in git, so a notebook can pin a known-good
 one — see [TUTORIAL.md §4](TUTORIAL.md) for the pinned-install syntax.
 
+## 0.2.1
+
+### Added
+
+- **`resolve_province()` and `resolve_province_frame()` in `great.geo`.** Combines the two
+  resolvers the way every caller actually wants: prefer the structured `Location` column when
+  it names a real province, fall back to scanning the headline and mention text otherwise.
+  `resolve_province_frame(df)` applies it across a frame and returns `[Provinsi, Pulau]`.
+  Both example notebooks carried a copy of this logic inline; now they call the library.
+- **`is_known_province()` and `KNOWN_PROVINCES`.** `resolve_from_structured_column()` returns
+  its input unchanged when it does not recognise it, so callers could not tell a match from a
+  miss. The inline notebook version inferred it by comparing input against output, which
+  silently discarded any `Location` that was *already* a correctly spelled province name —
+  the most reliable input there is. `is_known_province()` answers the question directly,
+  testing against the 41 canonical names in `PULAU_MAP`.
+
+### Changed
+
+- `weekly_environment_report()` → **`env_one_bar()`**, `daily_environment_report()` →
+  **`env_two_bar()`**. Anything importing the old names needs updating; they are gone, not
+  aliased.
+
 ## 0.2.0
 
 ### Added
@@ -14,8 +36,8 @@ one — see [TUTORIAL.md §4](TUTORIAL.md) for the pinned-install syntax.
   re-exported from `great`. Falls back to `ISLAND_FALLBACK` when only an island is named, and
   returns `"Tidak Terdeteksi"` when nothing matches. *(Naufaldo Indra Pratama)*
 - **`great.viz.environment`** — Indonesia choropleth reports for environmental-issue
-  monitoring. `weekly_environment_report()` draws a map plus one issue bar chart;
-  `daily_environment_report()` draws a map plus issue and per-island bar charts. Also
+  monitoring. `env_one_bar()` draws a map plus one issue bar chart;
+  `env_two_bar()` draws a map plus issue and per-island bar charts. Also
   `province_counts()`, `island_counts()` and `load_indonesia_geojson()`. Extracted from
   `Visual_Report_LH_Ver2.ipynb`, where the two figures duplicated eight helper functions
   verbatim between them.

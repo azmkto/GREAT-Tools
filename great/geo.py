@@ -488,8 +488,87 @@ def _canonicalize(province: str) -> str:
 def resolve_from_structured_column(raw_value: str) -> str:
     """Stage: kolom Provinsi yang sudah ada (data survei/export rapi).
     Lookup langsung, bukan scan — inputnya sudah berupa satu nama provinsi
-    (walau ejaan/singkatannya mungkin salah)."""
+    (walau ejaan/singkatannya mungkin salah).
+
+    Note this returns the input unchanged when it does not recognise it, so the return
+    value alone cannot tell you whether a match happened. Use `is_known_province()` for
+    that, or `resolve_province()` which handles it for you.
+    """
     return _canonicalize(str(raw_value).strip())
+
+
+# The canonical province names. Every PROVINCE_FIX and GEO_FIX target lands in this set,
+# so "is this a real province name?" is exactly "is it in here after canonicalisation?".
+KNOWN_PROVINCES = frozenset(PULAU_MAP)
+
+
+def is_known_province(value) -> bool:
+    """True if `value` names a real province, after spelling/abbreviation normalisation.
+
+    This is the question `resolve_from_structured_column()` cannot answer on its own: it
+    returns its input unchanged on a miss, so `'Sumatera Utara'` (already canonical, so
+    unchanged) and `'Airmadidi'` (a town, unrecognised, also unchanged) look identical to
+    the caller. Comparing input against output to detect a match therefore throws away
+    correctly-spelled province names, which are the most reliable input you can get.
+    """
+    if value is None:
+        return False
+    text = str(value).strip()
+    if not text:
+        return False
+    return _canonicalize(text) in KNOWN_PROVINCES
+
+
+def resolve_province(location=None, text=None) -> tuple:
+    """Best-effort (provinsi, pulau), preferring a structured column over a text scan.
+
+    Takes the structured `location` when it names a real province — that is the most
+    reliable signal available — and falls back to scanning `text` with the gazetteer
+    otherwise. Either argument may be omitted.
+
+    Typical use on a media-monitoring export, where `Location` is often a town rather than
+    a province and is frequently missing altogether:
+
+        provinsi, pulau = resolve_province(row['Location'],
+                                           f"{row['Headline']} {row['Mentions']}")
+
+    Return matches `resolve_from_free_text()`: both values are "Tidak Terdeteksi" when
+    nothing resolves, or ("Provinsi Tidak Spesifik", <pulau>) when only an island is named.
+    """
+    if is_known_province(location):
+        province = _canonicalize(str(location).strip())
+        return province, PULAU_MAP.get(province, 'Tidak Terdeteksi')
+
+    if text is not None and str(text).strip():
+        return resolve_from_free_text(text)
+
+    return 'Tidak Terdeteksi', 'Tidak Terdeteksi'
+
+
+def resolve_province_frame(data, location_col='Location',
+                           text_cols=('Headline', 'Mentions')):
+    """Run `resolve_province()` over a whole frame; returns a frame of [Provinsi, Pulau].
+
+    `text_cols` are concatenated to form the free-text fallback, so a place named in the
+    headline still counts when the mention body does not repeat it. Missing columns are
+    skipped rather than raising, since exports vary in which ones they carry.
+
+        df[['Provinsi', 'Pulau']] = resolve_province_frame(df)
+    """
+    import pandas as pd  # core dependency; imported here to keep this module's top light
+
+    present = [c for c in text_cols if c in data.columns]
+    locations = data[location_col] if location_col in data.columns else None
+
+    rows = []
+    for i, (_, row) in enumerate(data.iterrows()):
+        location = locations.iloc[i] if locations is not None else None
+        if location is not None and pd.isna(location):
+            location = None
+        text = ' '.join(str(row[c]) for c in present if pd.notna(row[c]))
+        rows.append(resolve_province(location, text))
+
+    return pd.DataFrame(rows, columns=['Provinsi', 'Pulau'], index=data.index)
 
 
 def resolve_from_free_text(text: str) -> tuple:
