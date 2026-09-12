@@ -351,7 +351,6 @@ PULAU_MAP = {
     'Jawa Barat': 'Jawa',
     'Jawa Tengah': 'Jawa',
     'DI Yogyakarta': 'Jawa',
-    'Daerah Istimewa Yogyakarta': 'Jawa',
     'Jawa Timur': 'Jawa',
 
     # Kalimantan
@@ -377,8 +376,6 @@ PULAU_MAP = {
     # Maluku
     'Maluku': 'Maluku',
     'Maluku Utara': 'Maluku',
-    'Maluku Selatan': 'Maluku',
-    'Maluku Tengah': 'Maluku',
 
     # Papua
     'Papua': 'Papua',
@@ -443,6 +440,142 @@ GEO_FIX = {
 }
 
 # =========================================================
+# NORMALISATION
+# =========================================================
+# Rank prefixes, and the trailing country/filler suffixes the exports actually contain.
+_RANK_PREFIX = re.compile(r'^(?:kab\.?|kabupaten|kota(?:\s+adm\.?)?|prov\.?|provinsi)\s+')
+_DROP_SUFFIX = re.compile(r',?\s*(?:indonesia|republik indonesia|id)\s*$')
+_PUNCT_EDGES = re.compile(
+    r'^[\s\-–—.,;:/\\|()\[\]"\']+|[\s\-–—.,;:/\\|()\[\]"\']+$'
+)
+
+
+def _normalize_simple(value):
+    """Casefold and collapse whitespace. The cheap half of normalisation."""
+    return ' '.join(str(value).split()).casefold()
+
+
+def _normalize(value):
+    """The lookup key for any location string.
+
+    Handles what real exports contain, which an exact-match lookup did not: mixed case,
+    repeated whitespace, the escaped `\\,` separators the monitoring tool emits, rank
+    prefixes ("KAB. ACEH SINGKIL"), and trailing ", Indonesia".
+    """
+    text = str(value).replace('\\,', ',').replace('\\', ' ')
+    text = _normalize_simple(text)
+    text = _PUNCT_EDGES.sub('', text)
+    text = _DROP_SUFFIX.sub('', text)
+    text = _RANK_PREFIX.sub('', text)
+    return _PUNCT_EDGES.sub('', text)
+
+
+def _candidates(value):
+    """Normalised lookup keys for `value`, most specific first.
+
+    A value like "Kota Bandung\\, Jawa Barat" names a city inside a province; the city is the
+    more useful answer, so it is tried first. Splitting also rescues the concatenated values
+    the monitoring tool emits, such as "Trenggalek\\, Indonesia".
+    """
+    raw = str(value).replace('\\,', ',')
+    parts = [p for p in re.split(r'[,;/|]', raw) if p.strip()]
+    seen, out = set(), []
+    for part in parts + [raw]:
+        key = _normalize(part)
+        if key and key not in seen:
+            seen.add(key)
+            out.append(key)
+    return out
+
+
+# =========================================================
+# LOOKUP TABLES
+# =========================================================
+# Normalised views of the hand-maintained maps. Building these once is what makes matching
+# case-insensitive: PROVINCE_FIX grew mixed-case keys over time, so an exact lookup
+# recognised 'Sumut' but not 'sumut' or 'SUMUT' -- only 7 of 41 provinces had a lowercase
+# entry, purely by accident of who added what.
+_PROVINCE_FIX_CI = {}
+for _key, _value in PROVINCE_FIX.items():
+    if isinstance(_value, str):
+        _PROVINCE_FIX_CI[_normalize_simple(_key)] = _value
+
+# Canonical province name keyed by its own normalised form, so 'aceh' and 'ACEH' both reach
+# 'Aceh' even though PROVINCE_FIX has no entry for either.
+_CANONICAL_BY_KEY = {_normalize_simple(_p): _p for _p in PULAU_MAP}
+
+# Official region data, generated from the BPS code list by `tools/build_regions.py`. It
+# supplies the authoritative kabupaten/kota -> province parentage that used to be maintained
+# by hand. The gazetteer above still matters: it carries ~213 entries the official list has no
+# concept of -- landmarks ("gunung leuser", "krakatau", "danau toba"), abbreviations
+# ("sumut", "kepri", "oki") and spelling variants -- which for environmental monitoring are
+# often the only location a mention names. So the two are merged, not swapped.
+from ._regions import PROVINCES as _OFFICIAL_PROVINCES  # noqa: E402
+from ._regions import REGION_TO_PROVINCE as _OFFICIAL_REGIONS  # noqa: E402
+
+_GAZETTEER = {_normalize_simple(_k): _v for _k, _v in LOCATION_TO_PROVINCE.items()}
+# Official parentage wins where the two disagree: the gazetteer predates the 2022 Papua split
+# ("puncak jaya" -> Papua Tengah, "raja ampat" -> Papua Barat Daya) and misfiled Kab. Kapuas.
+# Gazetteer-only keys survive untouched.
+_GAZETTEER.update(_OFFICIAL_REGIONS)
+
+# Province names are searchable too, so "Aceh" in free text resolves directly.
+for _name in _OFFICIAL_PROVINCES.values():
+    _GAZETTEER.setdefault(_normalize_simple(_name), _name)
+
+# Kabupaten that were wrongly listed as provinces in PULAU_MAP belong here instead.
+_GAZETTEER.setdefault('maluku tengah', 'Maluku')
+_GAZETTEER.setdefault('maluku selatan', 'Maluku')
+
+# Region names that are also ordinary Indonesian words, so matching them bare produces
+# confident nonsense. They stay reachable through their qualified forms ("kab. puncak"),
+# which the generated data already carries.
+#
+# `puncak` means "peak" -- "puncak el nino", "puncak musim kemarau" -- and also names the
+# Bogor highland everyone knows, on top of Kab. Puncak in Papua Tengah. Measured on 8,000
+# documents it matched 195 of them (2.4%), seven times the next new single-word key, and
+# mislocated Jakarta articles about the El Nino peak to Papua Tengah. Every other name the
+# official list adds is a genuine place at low frequency, so this set has one member.
+COMMON_WORD_REGIONS = frozenset({'puncak'})
+
+for _word in COMMON_WORD_REGIONS:
+    _GAZETTEER.pop(_word, None)
+
+KNOWN_PROVINCES = frozenset(PULAU_MAP)
+
+
+# =========================================================
+# AMBIGUOUS NAMES
+# =========================================================
+# Names that mean different places depending on the words around them. A table, so a future
+# case is one line rather than a code change.
+#
+# Every other landmark in the gazetteer whose bare name is also a kabupaten -- "danau toba",
+# "sungai siak", "gunung kerinci", "danau kerinci", "danau poso" -- agrees with the official
+# list, so these two are genuinely the only ones today.
+AMBIGUOUS_REGIONS = {
+    # Sungai Kapuas is West Kalimantan's river; Kab. Kapuas (62.03) is in Central Kalimantan.
+    'kapuas': ([('sungai', 'Kalimantan Barat')], 'Kalimantan Tengah'),
+    # Kota Banjar (32.79) is in West Java; the larger Kab. Banjar (63.03) is in South
+    # Kalimantan and is the likelier referent when nothing qualifies it.
+    'banjar': ([('kota', 'Jawa Barat')], 'Kalimantan Selatan'),
+}
+
+
+def _disambiguate(name, province, context):
+    """Apply `AMBIGUOUS_REGIONS` to a matched name, given the text it was found in."""
+    rule = AMBIGUOUS_REGIONS.get(name)
+    if rule is None:
+        return province
+    triggers, default = rule
+    haystack = (context or '').casefold()
+    for trigger, answer in triggers:
+        if trigger in haystack:
+            return answer
+    return default
+
+
+# =========================================================
 # BUILT ONCE, ON FIRST USE
 # =========================================================
 # 11 stdlib patterns, so these are cheap enough to build eagerly.
@@ -455,7 +588,7 @@ def _get_location_kp():
     """The gazetteer keyword scanner, built once on first use.
 
     Lazy for two reasons: it keeps the `flashtext` import off the `import great` path
-    (see the note at the top of this module), and it avoids loading ~570 keywords into a
+    (see the note at the top of this module), and it avoids loading ~1,500 keywords into a
     trie for anyone who never resolves a location.
 
     Raises ImportError with an actionable message if flashtext is missing.
@@ -470,131 +603,185 @@ def _get_location_kp():
                 'Install it with: pip install flashtext'
             ) from exc
         kp = KeywordProcessor(case_sensitive=False)
-        for loc in LOCATION_TO_PROVINCE:
+        for loc in _GAZETTEER:
             kp.add_keyword(loc)
         _location_kp_cache = kp
     return _location_kp_cache
 
 
 # =========================================================
-# RESOLVER FUNCTIONS
+# RESOLVERS
 # =========================================================
-def _canonicalize(province: str) -> str:
-    """Final normalisation pass — run on EVERY province value, no matter
-    which stage produced it, so ejaan/singkatan yang lolos tetap diseragamkan."""
-    return PROVINCE_FIX.get(province, province)
+UNDETECTED = 'Tidak Terdeteksi'
+ISLAND_ONLY = 'Provinsi Tidak Spesifik'
 
 
-def resolve_from_structured_column(raw_value: str) -> str:
-    """Stage: kolom Provinsi yang sudah ada (data survei/export rapi).
-    Lookup langsung, bukan scan — inputnya sudah berupa satu nama provinsi
-    (walau ejaan/singkatannya mungkin salah).
+def _canonicalize(province):
+    """Normalise a province name to its canonical spelling, case-insensitively.
 
-    Note this returns the input unchanged when it does not recognise it, so the return
-    value alone cannot tell you whether a match happened. Use `is_known_province()` for
-    that, or `resolve_province()` which handles it for you.
+    Returns the input unchanged when it is not a province name at all, which is what the
+    gazetteer path relies on.
     """
-    return _canonicalize(str(raw_value).strip())
-
-
-# The canonical province names. Every PROVINCE_FIX and GEO_FIX target lands in this set,
-# so "is this a real province name?" is exactly "is it in here after canonicalisation?".
-KNOWN_PROVINCES = frozenset(PULAU_MAP)
+    if province is None:
+        return province
+    key = _normalize_simple(province)
+    fixed = _PROVINCE_FIX_CI.get(key)
+    if fixed is not None:
+        return fixed
+    return _CANONICAL_BY_KEY.get(key, province)
 
 
 def is_known_province(value) -> bool:
-    """True if `value` names a real province, after spelling/abbreviation normalisation.
+    """True if `value` names a real province, after normalisation.
 
-    This is the question `resolve_from_structured_column()` cannot answer on its own: it
-    returns its input unchanged on a miss, so `'Sumatera Utara'` (already canonical, so
-    unchanged) and `'Airmadidi'` (a town, unrecognised, also unchanged) look identical to
-    the caller. Comparing input against output to detect a match therefore throws away
-    correctly-spelled province names, which are the most reliable input you can get.
+    Works for every spelling the library accepts -- canonical, abbreviation, any case, and
+    with or without a rank prefix.
     """
     if value is None:
         return False
-    text = str(value).strip()
-    if not text:
-        return False
-    return _canonicalize(text) in KNOWN_PROVINCES
+    return any(_canonicalize(key) in KNOWN_PROVINCES for key in _candidates(value) if key)
 
 
-def resolve_province(location=None, text=None) -> tuple:
-    """Best-effort (provinsi, pulau), preferring a structured column over a text scan.
-
-    Takes the structured `location` when it names a real province — that is the most
-    reliable signal available — and falls back to scanning `text` with the gazetteer
-    otherwise. Either argument may be omitted.
-
-    Typical use on a media-monitoring export, where `Location` is often a town rather than
-    a province and is frequently missing altogether:
-
-        provinsi, pulau = resolve_province(row['Location'],
-                                           f"{row['Headline']} {row['Mentions']}")
-
-    Return matches `resolve_from_free_text()`: both values are "Tidak Terdeteksi" when
-    nothing resolves, or ("Provinsi Tidak Spesifik", <pulau>) when only an island is named.
-    """
-    if is_known_province(location):
-        province = _canonicalize(str(location).strip())
-        return province, PULAU_MAP.get(province, 'Tidak Terdeteksi')
-
-    if text is not None and str(text).strip():
-        return resolve_from_free_text(text)
-
-    return 'Tidak Terdeteksi', 'Tidak Terdeteksi'
+def _lookup(value):
+    """(provinsi, pulau) for a structured location string, or None if unrecognised."""
+    for key in _candidates(value):
+        if not key:
+            continue
+        province = _PROVINCE_FIX_CI.get(key) or _CANONICAL_BY_KEY.get(key)
+        if province is None:
+            province = _GAZETTEER.get(key)
+            if province is not None:
+                province = _disambiguate(key, province, value)
+        if province is not None:
+            province = _canonicalize(province)
+            if province in KNOWN_PROVINCES:
+                return province, PULAU_MAP.get(province, UNDETECTED)
+    return None
 
 
-def resolve_province_frame(data, location_col='Location',
-                           text_cols=('Headline', 'Mentions')):
-    """Run `resolve_province()` over a whole frame; returns a frame of [Provinsi, Pulau].
-
-    `text_cols` are concatenated to form the free-text fallback, so a place named in the
-    headline still counts when the mention body does not repeat it. Missing columns are
-    skipped rather than raising, since exports vary in which ones they carry.
-
-        df[['Provinsi', 'Pulau']] = resolve_province_frame(df)
-    """
-    import pandas as pd  # core dependency; imported here to keep this module's top light
-
-    present = [c for c in text_cols if c in data.columns]
-    locations = data[location_col] if location_col in data.columns else None
-
-    rows = []
-    for i, (_, row) in enumerate(data.iterrows()):
-        location = locations.iloc[i] if locations is not None else None
-        if location is not None and pd.isna(location):
-            location = None
-        text = ' '.join(str(row[c]) for c in present if pd.notna(row[c]))
-        rows.append(resolve_province(location, text))
-
-    return pd.DataFrame(rows, columns=['Provinsi', 'Pulau'], index=data.index)
-
-
-def resolve_from_free_text(text: str) -> tuple:
-    """Stage: teks bebas (headline/mentions). Scan dulu pakai gazetteer untuk
-    menemukan kandidat lokasi paling spesifik, baru hasilnya dilewatkan
-    `_canonicalize` sebagai jaring pengaman terakhir.
-
-    Ties dipecahkan lewat panjang keyword (kandidat lebih panjang/spesifik
-    menang atas kandidat pendek yang juga match). Kalau tidak ada lokasi
-    spesifik ketemu, coba fallback nama pulau saja lewat `ISLAND_FALLBACK`.
-    Return: (provinsi, pulau) — keduanya "Tidak Terdeteksi" kalau nihil,
-    atau ("Provinsi Tidak Spesifik", <pulau>) kalau cuma pulau yang disebut.
-    """
-    text_lower = str(text).lower()
-    found = _get_location_kp().extract_keywords(text_lower)
+def _scan(text):
+    """(provinsi, pulau) from free text, using the gazetteer scan."""
+    lowered = str(text).casefold()
+    found = _get_location_kp().extract_keywords(lowered)
 
     if found:
         counts = {}
-        for loc in found:
-            counts[loc] = counts.get(loc, 0) + 1
-        best_loc, _ = max(counts.items(), key=lambda c: (c[1], len(c[0])))
-        prov = _canonicalize(LOCATION_TO_PROVINCE[best_loc])
-        return prov, PULAU_MAP.get(prov, "Tidak Terdeteksi")
+        for name in found:
+            counts[name] = counts.get(name, 0) + 1
+        # most mentions wins; ties go to the longer, more specific name
+        best, _ = max(counts.items(), key=lambda kv: (kv[1], len(kv[0])))
+        province = _canonicalize(_disambiguate(best, _GAZETTEER[best], lowered))
+        if province in KNOWN_PROVINCES:
+            return province, PULAU_MAP.get(province, UNDETECTED)
 
-    for name, pulau_name in ISLAND_FALLBACK.items():
-        if _ISLAND_PATTERNS[name].search(text_lower):
-            return "Provinsi Tidak Spesifik", pulau_name
+    for name, island in ISLAND_FALLBACK.items():
+        if _ISLAND_PATTERNS[name].search(lowered):
+            return ISLAND_ONLY, island
 
-    return "Tidak Terdeteksi", "Tidak Terdeteksi"
+    return UNDETECTED, UNDETECTED
+
+
+def resolve(location=None, text=None) -> tuple:
+    """Resolve a location to `(provinsi, pulau)`.
+
+    Scans `text` first and falls back to the structured `location` only when the text names
+    no place. Either argument may be omitted.
+
+        resolve(None, 'banjir melanda kota medan')  -> ('Sumatera Utara', 'Sumatera')
+        resolve('Kota Bandung\\, Jawa Barat')        -> ('Jawa Barat', 'Jawa')
+
+    **Why text wins.** In media-monitoring exports `Location` is the author's or outlet's
+    location, not the event's. Measured on 25k rows of the environment data, the two
+    disagree 74% of the time, and the disagreements look like `Location='Jakarta'` on an
+    article about fires in Kalimantan. For a map of where issues are *happening*, the article
+    text is the right signal; `Location` is a fallback for rows whose text names nowhere.
+
+    Returns `('Tidak Terdeteksi', 'Tidak Terdeteksi')` when nothing resolves, or
+    `('Provinsi Tidak Spesifik', <pulau>)` when only an island is named.
+    """
+    if text is not None and str(text).strip():
+        hit = _scan(text)
+        if hit[0] not in (UNDETECTED, ISLAND_ONLY):
+            return hit
+    else:
+        hit = None
+
+    if location is not None and str(location).strip():
+        structured = _lookup(location)
+        if structured is not None:
+            return structured
+
+    return hit if hit is not None else (UNDETECTED, UNDETECTED)
+
+
+def resolve_frame(data, location_col='Location', text_cols=('Headline', 'Mentions')):
+    """Run `resolve()` across a DataFrame; returns a frame of `[Provinsi, Pulau]`.
+
+        df[['Provinsi', 'Pulau']] = resolve_frame(df)
+
+    `text_cols` are joined before scanning, so a place named in the headline still counts when
+    the body does not repeat it. Missing columns are skipped rather than raising, since exports
+    vary in which ones they carry.
+
+    Follows `resolve()`'s precedence: the text scan runs first and `location_col` is consulted
+    only for rows the text could not place. See `resolve()` for why.
+
+    The structured fallback resolves each distinct value once rather than once per row -- a
+    25k-row export typically holds only a few hundred distinct locations.
+    """
+    import pandas as pd  # core dependency; imported here to keep this module's top light
+
+    index = data.index
+    present = [c for c in text_cols if c in data.columns]
+
+    provinces = pd.Series([None] * len(data), index=index, dtype=object)
+    islands = pd.Series([None] * len(data), index=index, dtype=object)
+
+    # --- free-text pass -----------------------------------------------------
+    if present:
+        # fillna before concatenating: on pandas 3 a NA in any column propagates through the
+        # whole expression, so one missing Headline would silently wipe out the Mentions text
+        # that actually carries the location.
+        blob = data[present[0]].fillna('').astype(str)
+        for col in present[1:]:
+            blob = blob + ' ' + data[col].fillna('').astype(str)
+        # Scan each distinct text once. Retweets and syndicated copy mean roughly half the
+        # rows in a real export repeat text verbatim, so this is close to a 2x saving and
+        # costs nothing when they happen to be unique.
+        seen = {text: _scan(text) for text in blob.unique()}
+        scanned = [seen[text] for text in blob]
+        found = pd.Series([t[0] not in (UNDETECTED, ISLAND_ONLY) for t in scanned], index=index)
+        provinces[found] = [t[0] for t, ok in zip(scanned, found) if ok]
+        islands[found] = [t[1] for t, ok in zip(scanned, found) if ok]
+    else:
+        scanned = None
+
+    # --- structured fallback for rows the text could not place, deduplicated
+    todo = provinces.isna()
+    if todo.any() and location_col in data.columns:
+        # fillna before astype: on pandas 3 the string accessor propagates NA rather than
+        # producing the literal 'nan', so unique() would otherwise hand back floats.
+        keys = data.loc[todo, location_col].fillna('').astype(str).str.strip()
+        table = {}
+        for value in keys.unique():
+            if not value or value.lower() == 'nan':
+                continue
+            hit = _lookup(value)
+            if hit is not None:
+                table[value] = hit
+        if table:
+            mapped = keys.map(table)
+            hit = mapped.notna()
+            idx = mapped.index[hit]
+            provinces[idx] = [t[0] for t in mapped[hit]]
+            islands[idx] = [t[1] for t in mapped[hit]]
+
+    # --- island-only results from the scan, for rows still unplaced ---------
+    if scanned is not None:
+        still = provinces.isna()
+        if still.any():
+            provinces[still] = [t[0] for t, ok in zip(scanned, still) if ok]
+            islands[still] = [t[1] for t, ok in zip(scanned, still) if ok]
+
+    return pd.DataFrame({'Provinsi': provinces.fillna(UNDETECTED),
+                         'Pulau': islands.fillna(UNDETECTED)}, index=index)
