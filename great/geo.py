@@ -38,6 +38,10 @@ LOCATION_TO_PROVINCE = {
     "krakatau": "Lampung", "gunung krakatau": "Lampung",
     "anak krakatau": "Lampung", "gunung anak krakatau": "Lampung",
     "selat sunda": "Lampung",
+    "aceh barat": "Aceh", "aceh barat daya": "Aceh", "aceh tengah": "Aceh",
+    "aceh tenggara": "Aceh", "aceh singkil": "Aceh", "gayo lues": "Aceh",
+    "nagan raya": "Aceh", "bener meriah": "Aceh", "pidie jaya": "Aceh",
+    "simeulue": "Aceh", "meulaboh": "Aceh", "takengon": "Aceh",
 
     "sumatera utara": "Sumatera Utara", "sumut": "Sumatera Utara", "medan": "Sumatera Utara",
     "binjai": "Sumatera Utara", "tebing tinggi": "Sumatera Utara", "pematangsiantar": "Sumatera Utara",
@@ -46,25 +50,41 @@ LOCATION_TO_PROVINCE = {
     "simalungun": "Sumatera Utara", "tapanuli": "Sumatera Utara", "toba": "Sumatera Utara", "nias": "Sumatera Utara",
     "danau toba": "Sumatera Utara", "sinabung": "Sumatera Utara", "gunung sinabung": "Sumatera Utara",
     "sibayak": "Sumatera Utara", "gunung sibayak": "Sumatera Utara", "nias selatan": "Sumatera Utara",
+    "labuhanbatu": "Sumatera Utara", "labuhan batu": "Sumatera Utara",
+    "labuhanbatu utara": "Sumatera Utara", "labuhanbatu selatan": "Sumatera Utara",
+    "dairi": "Sumatera Utara", "humbang hasundutan": "Sumatera Utara",
+    "pakpak bharat": "Sumatera Utara", "padang lawas": "Sumatera Utara",
+    "padang lawas utara": "Sumatera Utara", "asahan": "Sumatera Utara",
+    "batubara": "Sumatera Utara", "serdang bedagai": "Sumatera Utara",
+    "langkat": "Sumatera Utara", "samosir": "Sumatera Utara",
+    "tapanuli utara": "Sumatera Utara", "tapanuli selatan": "Sumatera Utara",
+    "tapanuli tengah": "Sumatera Utara", "padangsidimpuan": "Sumatera Utara",
 
     "sumatera barat": "Sumatera Barat", "sumbar": "Sumatera Barat", "padang": "Sumatera Barat",
     "bukittinggi": "Sumatera Barat", "pariaman": "Sumatera Barat", "padang panjang": "Sumatera Barat",
     "payakumbuh": "Sumatera Barat", "sawahlunto": "Sumatera Barat", "solok": "Sumatera Barat",
     "agam": "Sumatera Barat", "tanah datar": "Sumatera Barat", "mentawai": "Sumatera Barat", "pesisir selatan": "Sumatera Barat",
     "danau singkarak": "Sumatera Barat", "danau maninjau": "Sumatera Barat", "marapi": "Sumatera Barat", "gunung marapi": "Sumatera Barat",
+    "solok selatan": "Sumatera Barat", "pasaman": "Sumatera Barat",
+    "pasaman barat": "Sumatera Barat", "dharmasraya": "Sumatera Barat",
+    "sijunjung": "Sumatera Barat", "lima puluh kota": "Sumatera Barat",
+    "sungai rumbai": "Sumatera Barat",
 
     "riau": "Riau", "pekanbaru": "Riau", "dumai": "Riau", "bengkalis": "Riau",
     "rokan hilir": "Riau", "rokan hulu": "Riau", "kampar": "Riau", "siak": "Riau",
     "pelalawan": "Riau", "kuantan singingi": "Riau", "indragiri hilir": "Riau", "indragiri hulu": "Riau",
     "sungai siak": "Riau", "sungai rokan": "Riau", "tesso nilo": "Riau", "rantau kopar": "Riau",
+    "kuansing": "Riau", "duri": "Riau", "rantau kopar": "Riau",
 
     "kepulauan riau": "Kepulauan Riau", "kepri": "Kepulauan Riau", "batam": "Kepulauan Riau",
     "tanjungpinang": "Kepulauan Riau", "bintan": "Kepulauan Riau", "karimun": "Kepulauan Riau",
     "lingga": "Kepulauan Riau", "natuna": "Kepulauan Riau", "anambas": "Kepulauan Riau",
+    "meranti": "Kepulauan Riau", "kepulauan meranti": "Kepulauan Riau",
 
     "jambi": "Jambi", "sungai penuh": "Jambi", "muaro jambi": "Jambi", "bungo": "Jambi",
     "merangin": "Jambi", "kerinci": "Jambi", "batanghari": "Jambi", "sarolangun": "Jambi", "tanjung jabung": "Jambi",
     "gunung kerinci": "Jambi", "taman nasional kerinci seblat": "Jambi", "danau kerinci": "Jambi",
+    "tebo": "Jambi", "muaro bungo": "Jambi",
 
     "sumatera selatan": "Sumatera Selatan", "sumsel": "Sumatera Selatan", "palembang": "Sumatera Selatan",
     "prabumulih": "Sumatera Selatan", "lubuklinggau": "Sumatera Selatan", "pagar alam": "Sumatera Selatan",
@@ -72,6 +92,11 @@ LOCATION_TO_PROVINCE = {
     "lahat": "Sumatera Selatan", "ogan ilir": "Sumatera Selatan", "ogan komering ilir": "Sumatera Selatan",
     "oki": "Sumatera Selatan", "ogan komering ulu": "Sumatera Selatan", "oku": "Sumatera Selatan", "empat lawang": "Sumatera Selatan",
     "sungai musi": "Sumatera Selatan", "gunung dempo": "Sumatera Selatan", "sembilang": "Sumatera Selatan",
+    "musi rawas": "Sumatera Selatan", "musi rawas utara": "Sumatera Selatan",
+    "penukal abab lematang ilir": "Sumatera Selatan", "pali": "Sumatera Selatan",
+    "ogan komering ulu selatan": "Sumatera Selatan", "okus": "Sumatera Selatan",
+    "ogan komering ulu timur": "Sumatera Selatan", "okut": "Sumatera Selatan",
+    "pagaralam": "Sumatera Selatan",
 
     "bangka belitung": "Kepulauan Bangka Belitung", "babel": "Kepulauan Bangka Belitung",
     "pangkalpinang": "Kepulauan Bangka Belitung", "bangka": "Kepulauan Bangka Belitung", "belitung": "Kepulauan Bangka Belitung",
@@ -79,18 +104,20 @@ LOCATION_TO_PROVINCE = {
 
     "bengkulu": "Bengkulu", "rejanglebong": "Bengkulu", "rejang lebong": "Bengkulu",
     "seluma": "Bengkulu", "kaur": "Bengkulu", "mukomuko": "Bengkulu", "kepahiang": "Bengkulu", "lebong": "Bengkulu",
+    "bengkulu utara": "Bengkulu", "bengkulu selatan": "Bengkulu", "bengkulu tengah": "Bengkulu",
 
     "lampung": "Lampung", "bandar lampung": "Lampung", "metro": "Lampung", "pesawaran": "Lampung",
     "pringsewu": "Lampung", "tanggamus": "Lampung", "tulang bawang": "Lampung", "way kanan": "Lampung",
     "lampung selatan": "Lampung", "lampung tengah": "Lampung", "lampung utara": "Lampung", "lampung timur": "Lampung", "mesuji": "Lampung",
     "way kambas": "Lampung", "taman nasional way kambas": "Lampung", "bukit barisan selatan": "Lampung",
+    "lampung barat": "Lampung",
 
     # ---------------- JAWA ----------------
     "banten": "Banten", "tangerang": "Banten", "tangerang selatan": "Banten", "tangsel": "Banten",
     "cilegon": "Banten", "serang": "Banten", "lebak": "Banten", "pandeglang": "Banten",
     "ujung kulon": "Banten", "taman nasional ujung kulon": "Banten", "sawarna": "Banten",
     "serpong": "Banten", "bsd": "Banten", "ciputat": "Banten", "cikande": "Banten",
-    "balaraja": "Banten", "curug": "Banten", "cikupa": "Banten",
+    "balaraja": "Banten", "curug": "Banten", "cikupa": "Banten", "tigaraksa": "Banten", "cisoka": "Banten",
 
     "jakarta": "DKI Jakarta", "dki": "DKI Jakarta", "dki jakarta": "DKI Jakarta",
     "jakarta selatan": "DKI Jakarta", "jaksel": "DKI Jakarta", "jakarta barat": "DKI Jakarta", "jakbar": "DKI Jakarta",
@@ -110,7 +137,7 @@ LOCATION_TO_PROVINCE = {
     "tpa galuga": "Jawa Barat", "galuga": "Jawa Barat", "cibungbulang": "Jawa Barat",
     "cibinong": "Jawa Barat", "cileungsi": "Jawa Barat", "gunung putri": "Jawa Barat", "sentul": "Jawa Barat",
     "puncak bogor": "Jawa Barat", "jonggol": "Jawa Barat", "parung": "Jawa Barat", "sukmajaya": "Jawa Barat",
-    "juanda raya": "Jawa Barat",
+    "juanda raya": "Jawa Barat", "cikampek": "Jawa Barat", "rancaekek": "Jawa Barat", "kertajati": "Jawa Barat",
 
     "jawa tengah": "Jawa Tengah", "jateng": "Jawa Tengah", "semarang": "Jawa Tengah", "solo": "Jawa Tengah",
     "surakarta": "Jawa Tengah", "magelang": "Jawa Tengah", "pekalongan": "Jawa Tengah", "tegal": "Jawa Tengah",
@@ -140,6 +167,7 @@ LOCATION_TO_PROVINCE = {
     "banyuwangi": "Jawa Timur", "ijen": "Jawa Timur", "gunung bromo": "Jawa Timur", "bromo": "Jawa Timur",
     "gunung semeru": "Jawa Timur", "semeru": "Jawa Timur", "gunung kelud": "Jawa Timur", "gunung arjuno": "Jawa Timur",
     "bengawan solo": "Jawa Timur", "sungai brantas": "Jawa Timur", "brantas": "Jawa Timur",
+    "lamongan": "Jawa Timur",
 
     # ---------------- KALIMANTAN ----------------
     "kalimantan barat": "Kalimantan Barat", "kalbar": "Kalimantan Barat", "pontianak": "Kalimantan Barat",
@@ -159,7 +187,14 @@ LOCATION_TO_PROVINCE = {
     "kalimantan selatan": "Kalimantan Selatan", "kalsel": "Kalimantan Selatan", "banjarmasin": "Kalimantan Selatan",
     "banjarbaru": "Kalimantan Selatan", "martapura": "Kalimantan Selatan", "tabalong": "Kalimantan Selatan",
     "kotabaru": "Kalimantan Selatan", "tanah bumbu": "Kalimantan Selatan", "tanah laut": "Kalimantan Selatan", "tapin": "Kalimantan Selatan",
-    "hulu sungai": "Kalimantan Selatan",
+    "hulu sungai": "Kalimantan Selatan", "kuala kapuas": "Kalimantan Tengah", "kabupaten kapuas": "Kalimantan Tengah",
+    "pulang pisau": "Kalimantan Tengah", "gunung mas": "Kalimantan Tengah",
+    "barito selatan": "Kalimantan Tengah", "barito timur": "Kalimantan Tengah",
+    "barito utara": "Kalimantan Tengah", "lamandau": "Kalimantan Tengah",
+    "sukamara": "Kalimantan Tengah",
+    "barito kuala": "Kalimantan Selatan", "batola": "Kalimantan Selatan",
+    "balangan": "Kalimantan Selatan",
+    "landak": "Kalimantan Barat", "kayong utara": "Kalimantan Barat", "rasau jaya": "Kalimantan Barat",
 
     "kalimantan timur": "Kalimantan Timur", "kaltim": "Kalimantan Timur", "samarinda": "Kalimantan Timur",
     "balikpapan": "Kalimantan Timur", "bontang": "Kalimantan Timur", "ikn": "Kalimantan Timur",
@@ -182,7 +217,7 @@ LOCATION_TO_PROVINCE = {
     "sulawesi tengah": "Sulawesi Tengah", "sulteng": "Sulawesi Tengah", "palu": "Sulawesi Tengah",
     "donggala": "Sulawesi Tengah", "poso": "Sulawesi Tengah", "tolitoli": "Sulawesi Tengah",
     "luwuk": "Sulawesi Tengah", "banggai": "Sulawesi Tengah", "morowali": "Sulawesi Tengah", "sigi": "Sulawesi Tengah", "parigi moutong": "Sulawesi Tengah",
-    "danau poso": "Sulawesi Tengah", "lore lindu": "Sulawesi Tengah",
+    "danau poso": "Sulawesi Tengah", "lore lindu": "Sulawesi Tengah", "banggai kepulauan": "Sulawesi Tengah", "buol": "Sulawesi Tengah", "tojo una-una": "Sulawesi Tengah",
 
     "sulawesi barat": "Sulawesi Barat", "sulbar": "Sulawesi Barat", "mamuju": "Sulawesi Barat",
     "majene": "Sulawesi Barat", "polewali mandar": "Sulawesi Barat", "polman": "Sulawesi Barat",
@@ -193,17 +228,27 @@ LOCATION_TO_PROVINCE = {
     "pinrang": "Sulawesi Selatan", "enrekang": "Sulawesi Selatan", "toraja": "Sulawesi Selatan",
     "tana toraja": "Sulawesi Selatan", "bulukumba": "Sulawesi Selatan", "bantaeng": "Sulawesi Selatan",
     "jeneponto": "Sulawesi Selatan", "takalar": "Sulawesi Selatan", "maros": "Sulawesi Selatan", "pangkep": "Sulawesi Selatan",
-    "toraja utara": "Sulawesi Selatan", "danau matano": "Sulawesi Selatan",
+    "toraja utara": "Sulawesi Selatan", "danau matano": "Sulawesi Selatan",  "luwu": "Sulawesi Selatan", "luwu utara": "Sulawesi Selatan", 
+    "luwu timur": "Sulawesi Selatan","sinjai": "Sulawesi Selatan", "sidrap": "Sulawesi Selatan", "sidenreng rappang": "Sulawesi Selatan",
+    "barru": "Sulawesi Selatan", "selayar": "Sulawesi Selatan", "kepulauan selayar": "Sulawesi Selatan",
+    
 
     "sulawesi tenggara": "Sulawesi Tenggara", "sultra": "Sulawesi Tenggara", "kendari": "Sulawesi Tenggara",
     "bau-bau": "Sulawesi Tenggara", "baubau": "Sulawesi Tenggara", "muna": "Sulawesi Tenggara",
     "wakatobi": "Sulawesi Tenggara", "konawe": "Sulawesi Tenggara", "kolaka": "Sulawesi Tenggara", "bombana": "Sulawesi Tenggara",
+    "konawe selatan": "Sulawesi Tenggara", "konawe utara": "Sulawesi Tenggara", "kolaka utara": "Sulawesi Tenggara", "kolaka timur": "Sulawesi Tenggara",
+    "buton": "Sulawesi Tenggara", "buton utara": "Sulawesi Tenggara", "buton selatan": "Sulawesi Tenggara", "muna barat": "Sulawesi Tenggara",
+    "gorontalo utara": "Gorontalo",
 
     # ---------------- BALI & NUSA TENGGARA ----------------
     "bali": "Bali", "denpasar": "Bali", "badung": "Bali", "gianyar": "Bali",
     "tabanan": "Bali", "buleleng": "Bali", "singaraja": "Bali", "karangasem": "Bali",
     "klungkung": "Bali", "bangli": "Bali", "jembrana": "Bali",
-    "gunung agung": "Bali", "danau batur": "Bali", "kuta": "Bali", "ubud": "Bali",
+    "gunung agung": "Bali", "danau batur": "Bali", "kuta": "Bali", "ubud": "Bali", "sabu raijua": "Nusa Tenggara Timur", "malaka": "Nusa Tenggara Timur",
+    "sumba barat": "Nusa Tenggara Timur", "sumba timur": "Nusa Tenggara Timur",
+    "sumba tengah": "Nusa Tenggara Timur", "sumba barat daya": "Nusa Tenggara Timur",
+    "nagekeo": "Nusa Tenggara Timur", "manggarai timur": "Nusa Tenggara Timur",
+    "lembata": "Nusa Tenggara Timur",
 
     "nusa tenggara barat": "Nusa Tenggara Barat", "ntb": "Nusa Tenggara Barat", "mataram": "Nusa Tenggara Barat",
     "bima": "Nusa Tenggara Barat", "sumbawa": "Nusa Tenggara Barat", "dompu": "Nusa Tenggara Barat",
@@ -220,6 +265,9 @@ LOCATION_TO_PROVINCE = {
     # ---------------- MALUKU & PAPUA ----------------
     "maluku": "Maluku", "ambon": "Maluku", "tual": "Maluku", "buru": "Maluku",
     "seram": "Maluku", "aru": "Maluku", "kepulauan aru": "Maluku", "maluku tengah": "Maluku", "maluku tenggara": "Maluku",
+    "seram bagian barat": "Maluku", "seram bagian timur": "Maluku",
+    "maluku barat daya": "Maluku", "kepulauan tanimbar": "Maluku",
+    "supiori": "Papua",
 
     "maluku utara": "Maluku Utara", "ternate": "Maluku Utara", "tidore": "Maluku Utara",
     "halmahera": "Maluku Utara", "morotai": "Maluku Utara", "sula": "Maluku Utara",
