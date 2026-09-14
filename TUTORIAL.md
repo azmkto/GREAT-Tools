@@ -363,7 +363,7 @@ this conversation, or the pattern in `great/palette.py` + `wordcloud`'s
 | `great.issues` | Environmental-issue keyword rules | `classify_issue(text)` |
 | `great.geo` | 1,243-entry location gazetteer on official BPS codes, province fixes, province→island mapping | `resolve(location, text)`, `resolve_frame(df)`, `is_known_province(value)`, `LOCATION_TO_PROVINCE`, `AMBIGUOUS_REGIONS`, `PROVINCE_FIX`, `PULAU_MAP`, `GEO_FIX`, `ISLAND_ORDER` |
 | `great.viz.prep` | Reshapes a raw export into the frames the plots consume | `prepare_data(df)`, `sentiment_data(df)`, `platform_data(df)`, `plat_sent_data(df)` |
-| `great.viz.checks` | Load-time reports (they print, never raise) | `frame_info(obj, label)`, `share(series, top=None)`, `check_completeness/coverage/composition/labels(df)` |
+| `great.viz.checks` | Load-time reports (they print, never raise) | `frame_info(obj, label)`, `share(series, top=None)`, `completeness/coverage/composition/author/labels(df)` |
 | `great.viz.overview` | The sentiment/platform overview figure | `weekly_overview(...)`, `monthly_overview(..., interval)` |
 | `great.viz.wordcloud` | Sentiment word clouds from distinctive TF-IDF terms | `sentiment_wordclouds(df)`, `prepare_corpus(df)`, `tfidf_matrix(texts)`, `distinctive_terms(X, terms, mask)`, `ramp(hex)` |
 | `great.viz.environment` | Indonesia choropleth reports for environmental issues | `env_one_bar(df, start, end)`, `env_two_bar(...)`, `province_counts(df)`, `island_counts(df)`; both reports take `badge_size` for the map count labels |
@@ -505,7 +505,7 @@ Two things make this easy to miss:
   obvious across-the-board shift, and a file covering only the back half of a month
   (e.g. `prabowo_agustus1.xlsx`, 16-31 Aug) is not visibly affected at all.
 - **Nothing raises.** The wrong dates flow straight into the period labels in every plot
-  title, `monthly_overview`'s trend x-axis, `check_coverage()`'s day counts and
+  title, `monthly_overview`'s trend x-axis, `coverage()`'s day counts and
   peak/quietest day, and the `sort_values('Date')` ordering.
 
 The stored outputs inside the archived notebooks are from the original run and are
