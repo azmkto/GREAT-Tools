@@ -23,7 +23,7 @@ make `import great` require a full plotting and geospatial stack. Import it dire
     from great.viz.environment import env_two_bar
 """
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 from .labels import (
     sent_class,

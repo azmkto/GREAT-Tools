@@ -82,7 +82,7 @@ and
 | `issues.py` | Environmental issue keyword rules and `classify_issue()` |
 | `geo.py` | 1,243-entry gazetteer on official BPS codes, `resolve()`, `resolve_frame()`, province fixes, province→island mapping |
 | `viz/prep.py` | `prepare_data()`, `sentiment_data()`, `platform_data()`, `plat_sent_data()` |
-| `viz/checks.py` | `frame_info()`, `share()`, and the `check_*()` load-time reports |
+| `viz/checks.py` | `frame_info()`, `share()`, and the `completeness()`, `coverage()`, `composition()`, `author()`, `labels()` load-time reports |
 | `viz/overview.py` | `weekly_overview()`, `monthly_overview()` — needs `[viz]` |
 | `viz/wordcloud.py` | `sentiment_wordclouds()`, `distinctive_terms()`, `tfidf_matrix()`, `ramp()` — needs `[viz]` |
 | `viz/environment.py` | `env_one_bar()`, `env_two_bar()`, `province_counts()`, `island_counts()` — needs `[geo]` |

@@ -30,7 +30,7 @@ def frame_info(obj, label):
         print()
 
 
-def check_completeness(data):
+def completeness(data):
     """Print per-column missing-value counts, plus duplicate row/mention counts."""
     missing = data.isna().sum()
     print('Completeness:')
@@ -39,7 +39,7 @@ def check_completeness(data):
           f'Duplicate Mentions : {data["Mentions"].duplicated().sum():,}\n')
 
 
-def check_coverage(data):
+def coverage(data):
     """Print days covered, empty days, peak/quietest day and the daily average."""
     days = data['Date'].dt.normalize()
     daily = days.value_counts().sort_index()
@@ -68,20 +68,34 @@ def share(series, top=None):
                          'Share (%)': (counts / denominator * 100).round(1)})
 
 
-def check_composition(data, top_authors=10):
-    """Print the sentiment, platform and top-author breakdowns."""
+def composition(data):
+    """Print the sentiment and platform breakdowns, as counts and shares."""
     print('Sentiment Breakdown:')
     print(share(data['Sentiment']).to_string(), '\n')
 
     print('Platform Breakdown:')
     print(share(data['Media']).to_string(), '\n')
 
+
+def author(data, top_authors=10):
+    """Print the unique-author count and the busiest authors.
+
+    Split out of `composition()` because the two answer different questions --
+    `composition()` describes the mentions, this describes who produced them --
+    and because the author tail is long enough to bury the breakdowns above it.
+
+    Args:
+        data: An export frame carrying an `Author` column.
+        top_authors: How many authors to list. The share is still measured
+            against the whole frame, so the listed ten read as a percentage
+            of everything, not of the ten shown.
+    """
     print(f'Unique Authors: {data["Author"].nunique():,}\n')
     print(f'Top {top_authors} Authors:')
     print(share(data['Author'], top=top_authors).to_string(), '\n')
 
 
-def check_labels(data):
+def labels(data):
     """Report whether every Sentiment / Media value is one the library recognises.
 
     Delegates the actual vocabulary comparison to `great.validate_export()` so

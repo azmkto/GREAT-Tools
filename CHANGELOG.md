@@ -3,6 +3,35 @@
 Notable changes to `great`. Versions are tagged in git, so a notebook can pin a known-good
 one — see [TUTORIAL.md §4](TUTORIAL.md) for the pinned-install syntax.
 
+## 0.3.2
+
+### Breaking
+
+**Every `great.viz.checks` report was renamed, and the author breakdown is now its own
+function.** Old names are gone -- no aliases -- so a notebook calling them raises
+`AttributeError: module 'great.viz.checks' has no attribute 'check_composition'`.
+
+| was | is now |
+|---|---|
+| `checks.check_completeness(df)` | `checks.completeness(df)` |
+| `checks.check_coverage(df)` | `checks.coverage(df)` |
+| `checks.check_composition(df)` | `checks.composition(df)` **and** `checks.author(df)` |
+| `checks.check_labels(df)` | `checks.labels(df)` |
+
+The prefix was noise: you already write `checks.` to get here, so `checks.check_coverage()`
+said "check" twice and `checks.coverage()` says it once.
+
+**To upgrade**, drop the `check_` prefix -- and wherever you called `check_composition()`, add
+a `checks.author(df)` line after it. `composition()` now prints the sentiment and platform
+breakdowns only; the unique-author count and top-N author table moved to `author()`. Without
+that extra line the report still runs and you silently lose the author section.
+
+`author()` keeps the `top_authors=10` argument that used to sit on `check_composition()`.
+
+The split is deliberate: `composition()` describes the mentions, `author()` describes who
+produced them, and the author tail was long enough to bury the breakdowns printed above it.
+Anyone who wants the old single-call behaviour gets it from two lines in the order shown.
+
 ## 0.3.1
 
 ### Changed
