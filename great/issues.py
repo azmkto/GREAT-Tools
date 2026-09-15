@@ -141,9 +141,15 @@ ISSUE_RULES = [
     {
         'category': 'Bencana vulkanik',
         'keywords': [
-            'abu vulkanik', 'erupsi', 'gunung anak krakatau', 'aktivitas vulkanik',
-            'letusan gunung', 'awan panas', 'status siaga gunung', 'guguran lava',
-            'sinabung erupsi', 'merapi erupsi',
+            'abu vulkanik', 'debu vulkanik', 'erupsi', 'gunung anak krakatau',
+            'aktivitas vulkanik', 'letusan gunung', 'awan panas', 'status siaga gunung',
+            'guguran lava', 'sinabung erupsi', 'merapi erupsi',
+            'lewotobi', 'gunung lewotobi', 'ile lewotobi', 'gunung ibu', 'gunung ruang',
+            'gunung marapi', 'gunung semeru', 'gunung kerinci', 'gunung dukono',
+            'status awas gunung', 'level awas', 'radius bahaya', 'zona bahaya vulkanik',
+            'muntahan lava', 'lontaran batu pijar', 'gempa vulkanik', 'tremor vulkanik',
+            'material vulkanik', 'evakuasi warga gunung', 'ppgba', 'pvmbg',
+            'kolom abu', 'semburan abu',
         ],
     },
     {
