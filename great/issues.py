@@ -23,7 +23,9 @@ ISSUE_RULES = [
             'tambang', 'pertambangan', 'peti', 'tambang emas',
             'batubara', 'batu bara', 'nikel', 'mining',
             'galian', 'tambang ilegal', 'penambangan liar',
-            'izin usaha pertambangan', 'reklamasi tambang',
+            'izin usaha pertambangan', 'iup', 'reklamasi tambang',
+            'tambang pasir', 'penambangan pasir ilegal', 'tambang timah',
+            'lubang tambang', 'bekas tambang', 'galian c',
         ],
     },
     {
@@ -32,7 +34,8 @@ ISSUE_RULES = [
             'agraria', 'konflik lahan', 'sengketa tanah',
             'konflik', 'sengketa', 'gusur', 'penggusuran',
             'konflik agraria', 'perebutan lahan', 'sengketa tanah adat',
-            'penggusuran lahan warga',
+            'penggusuran lahan warga', 'perampasan lahan', 'mafia tanah',
+            'sengketa lahan', 'konflik tenurial', 'hak ulayat',
         ],
     },
     {
@@ -42,7 +45,8 @@ ISSUE_RULES = [
             'penggundulan', 'pembalakan', 'illegal logging',
             'penebangan liar', 'alih fungsi hutan', 'bekas tebangan',
             'pembukaan lahan hutan', 'ditanami sawit', 'lahan sawit',
-            'alih fungsi jadi sawit',
+            'alih fungsi jadi sawit', 'perambahan hutan', 'hutan gundul',
+            'konversi hutan', 'tutupan hutan hilang', 'kawasan hutan lindung rusak',
         ],
     },
     {
@@ -50,6 +54,8 @@ ISSUE_RULES = [
         'keywords': [
             'banjir', 'longsor', 'banjir bandang',
             'tanah longsor', 'banjir rob', 'banjir merendam',
+            'banjir lahar', 'genangan', 'banjir luapan sungai',
+            'debit air sungai meningkat', 'tanggul jebol',
         ],
     },
     {
@@ -61,7 +67,8 @@ ISSUE_RULES = [
             'limbah pabrik', 'pencemaran sungai', 'air tercemar', 'limbah b3',
             'air menghitam', 'sungai menghitam', 'ipal', 'limbah elektronik',
             'e-waste', 'limbah pabrik sawit', 'pencemaran kali', 'kali tercemar',
-            'sumber limbah',
+            'sumber limbah', 'limbah cair', 'limbah medis', 'air baku tercemar',
+            'pencemaran lingkungan',
         ],
     },
     {
@@ -76,6 +83,8 @@ ISSUE_RULES = [
             'sampah menjadi energi', 'reduce reuse recycle',
             'pengelolaan limbah', 'fasilitas pengolahan sampah',
             'sekam padi', 'tpa galuga', 'tpa karang',
+            'daur ulang', 'sampah laut', 'microplastic', 'mikroplastik',
+            'sampah anorganik', 'pungut sampah',
         ],
     },
     {
@@ -83,7 +92,8 @@ ISSUE_RULES = [
         'keywords': [
             'kemarau panjang', 'krisis air', 'kekeringan',
             'krisis air bersih', 'el nino', 'musim kemarau panjang',
-            'sumber air mengering',
+            'sumber air mengering', 'sumur kering', 'debit air menurun',
+            'kekurangan air bersih', 'krisis air baku',
         ],
     },
     {
@@ -96,7 +106,8 @@ ISSUE_RULES = [
             'pembakaran hutan', 'pembakaran lahan',
             'kebakaran lapak', 'lapak limbah', 'lokasi kebakaran',
             'hektare lahan terdampak', 'lahan terdampak kebakaran',
-            'api berkobar',
+            'api berkobar', 'gambut terbakar', 'kebakaran gambut',
+            'satgas karhutla', 'modifikasi cuaca',
         ],
     },
     {
@@ -104,6 +115,8 @@ ISSUE_RULES = [
         'keywords': [
             'abrasi', 'abrasi pantai', 'erosi', 'pesisir',
             'terumbu karang', 'pencemaran laut', 'reklamasi pantai',
+            'garis pantai mundur', 'erosi pantai', 'rob pesisir',
+            'kerusakan pesisir',
         ],
     },
     {
@@ -112,6 +125,8 @@ ISSUE_RULES = [
             'satwa', 'habitat', 'ekosistem', 'mangrove',
             'terumbu', 'biodiversitas', 'konservasi',
             'satwa dilindungi', 'orang utan', 'habitat satwa', 'populasi satwa',
+            'perburuan liar', 'perdagangan satwa liar', 'spesies langka',
+            'satwa langka', 'hutan mangrove', 'kawasan konservasi',
         ],
     },
     {
@@ -119,22 +134,24 @@ ISSUE_RULES = [
         'keywords': [
             'udara', 'asap', 'emisi', 'polusi udara',
             'pencemaran udara', 'ispu', 'pm2,5', 'pm2.5', 'kualitas udara buruk',
-            'panel surya', 'energi terbarukan', 'energi surya',
-            'pembangkit listrik tenaga surya', 'plts',
+            'kabut polusi', 'udara tidak sehat', 'indeks kualitas udara',
+            'polusi kendaraan', 'emisi kendaraan', 'uji emisi',
         ],
     },
     {
         'category': 'Bencana vulkanik',
         'keywords': [
             'abu vulkanik', 'erupsi', 'gunung anak krakatau', 'aktivitas vulkanik',
-            'letusan gunung', 'awan panas',
+            'letusan gunung', 'awan panas', 'status siaga gunung', 'guguran lava',
+            'sinabung erupsi', 'merapi erupsi',
         ],
     },
     {
         'category': 'Perubahan iklim/emisi',
         'keywords': [
             'perubahan iklim', 'emisi karbon', 'gas rumah kaca', 'pemanasan global',
-            'net zero emission', 'krisis iklim',
+            'krisis iklim', 'cuaca ekstrem', 'anomali cuaca', 'gelombang panas',
+            'kenaikan permukaan laut', 'jejak karbon', 'karbon dioksida',
         ],
     },
     {
@@ -143,6 +160,36 @@ ISSUE_RULES = [
             'penanaman pohon', 'wakaf hijau', 'menjaga lingkungan',
             'kelestarian lingkungan', 'pelestarian lingkungan',
             'gerakan tanam pohon', 'reboisasi', 'penghijauan',
+            'restorasi lahan', 'restorasi hutan', 'rehabilitasi lahan',
+            'hutan wakaf', 'taman kota hijau',
+        ],
+    },
+    {
+        'category': 'Energi terbarukan (EBT)',
+        'keywords': [
+            'energi terbarukan', 'energi baru terbarukan', 'ebt',
+            'panel surya', 'energi surya', 'pembangkit listrik tenaga surya', 'plts',
+            'energi angin', 'pembangkit listrik tenaga bayu', 'pltb',
+            'pembangkit listrik tenaga air', 'plta', 'mikrohidro',
+            'panas bumi', 'geothermal', 'pembangkit listrik tenaga panas bumi', 'pltp',
+            'biomassa', 'biofuel', 'biodiesel', 'bioenergi', 'bahan bakar nabati',
+            'energi bersih', 'energi hijau', 'transisi energi',
+            'net zero emission', 'dekarbonisasi', 'kendaraan listrik',
+            'baterai listrik', 'hidrogen hijau',
+        ],
+    },
+    {
+        'category': 'Krisis energi/BBM konvensional',
+        'keywords': [
+            'krisis energi', 'harga bbm', 'kenaikan harga bbm', 'bbm subsidi',
+            'subsidi bbm', 'harga minyak', 'harga gas', 'kelangkaan bbm',
+            'ketahanan energi', 'energi nasional', 'energi fosil',
+            'bahan bakar fosil', 'krisis listrik', 'pemadaman listrik',
+            'tarif listrik', 'kelangkaan energi', 'pasokan energi',
+            'impor bbm', 'impor minyak', 'harga energi', 'kebijakan energi',
+            'pertamina', 'elpiji', 'gas lpg', 'kelangkaan gas',
+            'pertalite', 'pertamax', 'solar subsidi', 'antrean bbm',
+            'opec', 'harga gas dunia', 'blackout',
         ],
     },
 ]
