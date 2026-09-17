@@ -210,7 +210,7 @@ ISSUE_RULES = [
         ],
     },
     {
-        'category': 'Krisis energi/BBM konvensional',
+        'category': 'Krisis Energi Nasional',
         'keywords': [
             'krisis energi', 'harga bbm', 'kenaikan harga bbm', 'bbm subsidi',
             'subsidi bbm', 'harga minyak', 'harga gas', 'kelangkaan bbm',
