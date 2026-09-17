@@ -74,7 +74,7 @@ LOCATION_TO_PROVINCE = {
     "rokan hilir": "Riau", "rokan hulu": "Riau", "kampar": "Riau", "siak": "Riau",
     "pelalawan": "Riau", "kuantan singingi": "Riau", "indragiri hilir": "Riau", "indragiri hulu": "Riau",
     "sungai siak": "Riau", "sungai rokan": "Riau", "tesso nilo": "Riau", "rantau kopar": "Riau",
-    "kuansing": "Riau", "duri": "Riau", "rantau kopar": "Riau",
+    "kuansing": "Riau", "duri": "Riau",
 
     "kepulauan riau": "Kepulauan Riau", "kepri": "Kepulauan Riau", "batam": "Kepulauan Riau",
     "tanjungpinang": "Kepulauan Riau", "bintan": "Kepulauan Riau", "karimun": "Kepulauan Riau",
@@ -199,7 +199,8 @@ LOCATION_TO_PROVINCE = {
     "kalimantan timur": "Kalimantan Timur", "kaltim": "Kalimantan Timur", "samarinda": "Kalimantan Timur",
     "balikpapan": "Kalimantan Timur", "bontang": "Kalimantan Timur", "ikn": "Kalimantan Timur",
     "nusantara": "Kalimantan Timur", "kutai": "Kalimantan Timur", "kutai kartanegara": "Kalimantan Timur",
-    "kutai timur": "Kalimantan Timur", "berau": "Kalimantan Timur", "penajam": "Kalimantan Timur", "paser": "Kalimantan Timur",
+    "kutai timur": "Kalimantan Timur", "kutai barat": "Kalimantan Timur", "mahakam ulu": "Kalimantan Timur",
+    "berau": "Kalimantan Timur", "penajam": "Kalimantan Timur", "paser": "Kalimantan Timur",
     "tenggarong": "Kalimantan Timur", "tenggarong seberang": "Kalimantan Timur",
     "sungai mahakam": "Kalimantan Timur", "mahakam": "Kalimantan Timur", "penajam paser utara": "Kalimantan Timur",
 
@@ -258,7 +259,7 @@ LOCATION_TO_PROVINCE = {
     "nusa tenggara timur": "Nusa Tenggara Timur", "ntt": "Nusa Tenggara Timur", "kupang": "Nusa Tenggara Timur",
     "ende": "Nusa Tenggara Timur", "maumere": "Nusa Tenggara Timur", "sikka": "Nusa Tenggara Timur",
     "manggarai": "Nusa Tenggara Timur", "labuan bajo": "Nusa Tenggara Timur", "rote": "Nusa Tenggara Timur",
-    "sumba": "Nusa Tenggara Timur", "sumba timur": "Nusa Tenggara Timur", "alor": "Nusa Tenggara Timur",
+    "sumba": "Nusa Tenggara Timur", "alor": "Nusa Tenggara Timur",
     "belu": "Nusa Tenggara Timur", "atambua": "Nusa Tenggara Timur", "timor tengah": "Nusa Tenggara Timur",
     "pulau komodo": "Nusa Tenggara Timur", "taman nasional komodo": "Nusa Tenggara Timur", "flores": "Nusa Tenggara Timur", "manggarai barat": "Nusa Tenggara Timur",
 
