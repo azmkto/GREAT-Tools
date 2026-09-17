@@ -246,6 +246,13 @@ NOISE_RULES = [
         ],
     },
     {
+        'category': 'Horoskop/spiritual',
+        'keywords': [
+            'zodiak', 'horoskop', 'ramalan', 'shio',
+            'padre pio', 'wahyu spiritual', 'akhir zaman', 'kiamat',
+        ],
+    },
+    {
         'category': 'Spam/klik-bait',
         'keywords': [
             'sangat murah', 'klik disini', 'daftar sekarang', 'promo terbatas',
@@ -256,6 +263,20 @@ NOISE_RULES = [
         'category': 'Obrolan personal/relationship',
         'keywords': [
             'patriarki', 'laki ga', 'suami', 'pacar', 'mantan',
+        ],
+    },
+    {
+        'category': 'Finansial/investasi non-lingkungan',
+        'keywords': [
+            'hedge fund', 'investor kawakan', 'multifinance', 'reksadana',
+            'ihsg', 'saham', 'obligasi', 'cadangan devisa', 'kurs rupiah',
+        ],
+    },
+    {
+        'category': 'Olahraga',
+        'keywords': [
+            'timnas', 'sepak bola', 'piala dunia', 'liga champions',
+            'skor pertandingan', 'pemain bola',
         ],
     },
 ]
