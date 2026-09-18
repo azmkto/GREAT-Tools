@@ -228,6 +228,18 @@ ISSUE_RULES = [
             'pembatasan jam operasional', 'penghematan bbm',
         ],
     },
+    {
+    'category': 'Pemulihan Pascabencana',
+    'keywords': [
+        'rehabilitasi rekonstruksi', 'rekonstruksi pascabencana', 'percepatan rehabilitasi',
+        'fase rehabilitasi', 'rehabilitasi lahan terdegradasi', 'pascabencana',
+        'penanganan bencana', 'mitigasi bencana', 'hunian tetap', 'huntap',
+        'terdampak bencana', 'korban bencana', 'pelatihan kebencanaan',
+        'satgas rehabilitasi', 'satgas rekonstruksi', 'dana rehabilitasi',
+        'bantuan pascabencana', 'pemulihan ekonomi pascabencana', 'trauma healing',
+        'relokasi korban bencana', 'tempat pengungsian', 'posko pengungsian',
+    ],
+},
 ]
 
 _OTHER = 'Isu lingkungan lain'
@@ -278,6 +290,10 @@ NOISE_RULES = [
             'timnas', 'sepak bola', 'piala dunia', 'liga champions',
             'skor pertandingan', 'pemain bola',
         ],
+    },
+    {
+    'category': 'Hiburan/selebriti',
+    'keywords': ['idol', 'aktor', 'artis', 'selebriti', 'drama korea', 'comeback', 'konser'],
     },
 ]
 
