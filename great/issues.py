@@ -39,11 +39,11 @@ ISSUE_RULES = [
         'category': 'Konflik agraria',
         'keywords': [
             'agraria', 'konflik lahan', 'sengketa tanah',
-            'konflik', 'sengketa', 'gusur', 'penggusuran',
+            'gusur', 'penggusuran',
             'konflik agraria', 'perebutan lahan', 'sengketa tanah adat',
             'penggusuran lahan warga', 'perampasan lahan', 'mafia tanah',
             'sengketa lahan', 'konflik tenurial', 'hak ulayat',
-        ],
+    ],
     },
     {
         'category': 'Deforestasi',
@@ -157,11 +157,11 @@ ISSUE_RULES = [
     {
         'category': 'Polusi udara',
         'keywords': [
-            'udara', 'asap', 'emisi', 'polusi udara',
+            'asap', 'emisi', 'polusi udara',
             'pencemaran udara', 'ispu', 'pm2,5', 'pm2.5', 'kualitas udara buruk',
             'kabut polusi', 'udara tidak sehat', 'indeks kualitas udara',
             'polusi kendaraan', 'emisi kendaraan', 'uji emisi',
-        ],
+    ],
     },
     {
         'category': 'Bencana vulkanik',
@@ -290,6 +290,13 @@ NOISE_RULES = [
             'timnas', 'sepak bola', 'piala dunia', 'liga champions',
             'skor pertandingan', 'pemain bola',
         ],
+    },
+    {
+    'category': 'Kesehatan pribadi',
+    'keywords': [
+        'diabetes', 'gejala', 'gula darah', 'kolesterol', 'obat herbal',
+        'penyakit dalam', 'keluhan kesehatan', 'cara mengobati',
+        'hamil', 'kehamilan', 'menyusui', 'mp asi', 'nifas', 'bayi'],
     },
     {
     'category': 'Hiburan/selebriti',
