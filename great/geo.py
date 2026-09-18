@@ -68,7 +68,7 @@ LOCATION_TO_PROVINCE = {
     "solok selatan": "Sumatera Barat", "pasaman": "Sumatera Barat",
     "pasaman barat": "Sumatera Barat", "dharmasraya": "Sumatera Barat",
     "sijunjung": "Sumatera Barat", "lima puluh kota": "Sumatera Barat",
-    "sungai rumbai": "Sumatera Barat",
+    "sungai rumbai": "Sumatera Barat", "limapuluh kota": "Sumatera Barat",
 
     "riau": "Riau", "pekanbaru": "Riau", "dumai": "Riau", "bengkalis": "Riau",
     "rokan hilir": "Riau", "rokan hulu": "Riau", "kampar": "Riau", "siak": "Riau",
