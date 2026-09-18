@@ -96,7 +96,7 @@ LOCATION_TO_PROVINCE = {
     "penukal abab lematang ilir": "Sumatera Selatan", "pali": "Sumatera Selatan",
     "ogan komering ulu selatan": "Sumatera Selatan", "okus": "Sumatera Selatan",
     "ogan komering ulu timur": "Sumatera Selatan", "okut": "Sumatera Selatan",
-    "pagaralam": "Sumatera Selatan",
+    "pagaralam": "Sumatera Selatan", "muaradua": "Sumatera Selatan",
 
     "bangka belitung": "Kepulauan Bangka Belitung", "babel": "Kepulauan Bangka Belitung",
     "pangkalpinang": "Kepulauan Bangka Belitung", "bangka": "Kepulauan Bangka Belitung", "belitung": "Kepulauan Bangka Belitung",
@@ -608,6 +608,7 @@ AMBIGUOUS_REGIONS = {
     # Kota Banjar (32.79) is in West Java; the larger Kab. Banjar (63.03) is in South
     # Kalimantan and is the likelier referent when nothing qualifies it.
     'banjar': ([('kota', 'Jawa Barat')], 'Kalimantan Selatan'),
+    'danau ranau': ([('lampung', 'Lampung')], 'Sumatera Selatan'),
 }
 
 
