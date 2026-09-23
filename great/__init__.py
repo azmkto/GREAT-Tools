@@ -53,7 +53,6 @@ from .palette import (
 )
 from .schema import EXPORT_COLUMNS, validate_export
 from .issues import ISSUE_RULES, classify_issue
-from .topics import ThemeRule, ProjectRules, apply_rules
 from .geo import (
     PROVINCE_FIX,
     PULAU_MAP,
@@ -103,8 +102,6 @@ __all__ = [
     "EXPORT_COLUMNS", "validate_export",
     # issues
     "ISSUE_RULES", "classify_issue",
-    # topics
-    "ThemeRule", "ProjectRules", "apply_rules",
     # geo
     "PROVINCE_FIX", "PULAU_MAP", "ISLAND_ORDER", "ISLAND_FALLBACK", "GEO_FIX",
     "LOCATION_TO_PROVINCE",
