@@ -15,13 +15,6 @@ level. Keep it that way -- a module-level `import ftfy` in `great/text.py` would
 
 `great.geo` follows the same rule: `flashtext` is imported on first use, not at import time.
 
-`great.pipeline` and `great.rules` are not re-exported either: the pipeline pulls `requests`,
-`openpyxl` and the `[text]` stack, and keeping the two topic-analysis packages out of the flat
-namespace keeps `from great import ...` what it has always been. Import them directly:
-
-    from great.pipeline import load, prep, store
-    from great.rules import load_project, apply_matcher
-
 `great.viz` is deliberately **not** re-exported here. It imports matplotlib, scikit-learn,
 wordcloud and (for `great.viz.environment`) geopandas at module level, so pulling it in would
 make `import great` require a full plotting and geospatial stack. Import it directly:
@@ -30,7 +23,7 @@ make `import great` require a full plotting and geospatial stack. Import it dire
     from great.viz.environment import env_two_bar
 """
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 
 from .labels import (
     sent_class,
@@ -40,6 +33,8 @@ from .labels import (
     MAJAS_LABEL_FIX,
     MAJAS_LABEL_MAP,
     normalize_majas,
+    MEDIA_ACCOUNTS,
+    is_media_account,
 )
 from .palette import (
     sent_colors,
@@ -58,6 +53,7 @@ from .palette import (
 )
 from .schema import EXPORT_COLUMNS, validate_export
 from .issues import ISSUE_RULES, classify_issue
+from .topics import ThemeRule, ProjectRules, apply_rules
 from .geo import (
     PROVINCE_FIX,
     PULAU_MAP,
@@ -80,6 +76,7 @@ from .text import (
     WORDCLOUD_STOPWORDS_EXTRA,
     normalize_slang,
     clean_for_bert,
+    clean_for_ner,
     clean_for_topics,
     clean_for_wordcloud,
 )
@@ -96,6 +93,7 @@ __all__ = [
     # labels
     "sent_class", "plat_class", "emo_class", "MEDIA_MAP",
     "MAJAS_LABEL_FIX", "MAJAS_LABEL_MAP", "normalize_majas",
+    "MEDIA_ACCOUNTS", "is_media_account",
     # palette
     "sent_colors", "plat_colors", "emo_colors",
     "CMAP_NAME", "BASE_MAP_COLOR", "EDGE_COLOR", "ACTIVE_EDGE_COLOR",
@@ -105,6 +103,8 @@ __all__ = [
     "EXPORT_COLUMNS", "validate_export",
     # issues
     "ISSUE_RULES", "classify_issue",
+    # topics
+    "ThemeRule", "ProjectRules", "apply_rules",
     # geo
     "PROVINCE_FIX", "PULAU_MAP", "ISLAND_ORDER", "ISLAND_FALLBACK", "GEO_FIX",
     "LOCATION_TO_PROVINCE",
@@ -118,6 +118,7 @@ __all__ = [
     "WORDCLOUD_STOPWORDS_EXTRA",
     "normalize_slang",
     "clean_for_bert",
+    "clean_for_ner",
     "clean_for_topics",
     "clean_for_wordcloud",
 ]
