@@ -100,6 +100,10 @@ SLANG = {
     "yng": "yang", "dngan": "dengan", "utuk": "untuk",
     "smpai": "sampai", "sampe": "sampai", "bwt": "buat", "buatt": "buat",
     "jgnlah": "janganlah", "tuhh": "tuh", "sihh": "sih", "dehh": "deh",
+    # Honorifics & forms of address
+    "pak": "bapak", "bu": "ibu", "min": "admin",
+    # Actor nicknames
+    "wowo": "prabowo",
 }
 
 TOPIC_STOPWORDS_BASE = {
