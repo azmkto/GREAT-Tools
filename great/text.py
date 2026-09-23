@@ -3,8 +3,8 @@
 Four cleaners are exposed:
 - `clean_for_bert()`: Keeps case, punctuation, and stopwords. Fixes encoding, strips URLs/@mentions,
   unwraps hashtags, and normalises slang.
-- `clean_for_ner()`: Like `clean_for_bert()` but with no slang rewriting, @mentions kept as names
-  and CamelCase hashtags split, so entity spans stay faithful to the original post.
+- `clean_for_ner()`: Like `clean_for_bert()` but without slang normalisation, keeping @mention
+  names and splitting CamelCase hashtags, so entity spans match the original post.
 - `clean_for_topics()`: Lowercases, strips non-letters, removes stopwords (Sastrawi + NLTK + TOPIC_STOPWORDS_BASE),
   and normalises slang.
 - `clean_for_wordcloud()`: Extends `clean_for_topics()` with `WORDCLOUD_STOPWORDS_EXTRA`.
@@ -155,39 +155,17 @@ SLANG_PATTERN = re.compile(
 )
 
 _stopwords_tm_cache: Optional[Set[str]] = None
-_extra_slang_cache: dict = {}
 
 
 # ==============================================================================
 # 3. HELPER FUNCTIONS
 # ==============================================================================
 
-def _slang_table(extra_slang: Optional[dict]):
-    """Return (mapping, pattern). Without `extra_slang` this is the module-level pair, so the
-    default path is byte-for-byte what it was before `extra_slang` existed."""
-    if not extra_slang:
-        return SLANG, SLANG_PATTERN
-    key = tuple(sorted(extra_slang.items()))
-    if key not in _extra_slang_cache:
-        merged = {**SLANG, **extra_slang}
-        pattern = re.compile(
-            r"\b(" + "|".join(re.escape(k) for k in sorted(merged, key=len, reverse=True)) + r")\b"
-        )
-        _extra_slang_cache[key] = (merged, pattern)
-    return _extra_slang_cache[key]
-
-
-def normalize_slang(text: str, extra_slang: Optional[dict] = None) -> str:
-    """Replace known Indonesian slang/abbreviations using `SLANG` mapping.
-
-    `extra_slang` adds project-specific entries (e.g. `{"wowo": "prabowo"}`) for this call only.
-    It exists so notebooks stop overwriting `great.text.SLANG` / `SLANG_PATTERN` at runtime,
-    which silently changed the cleaning of every other caller in the same session.
-    """
+def normalize_slang(text: str) -> str:
+    """Replace known Indonesian slang/abbreviations using `SLANG` mapping."""
     if not text:
         return ""
-    mapping, pattern = _slang_table(extra_slang)
-    return pattern.sub(lambda m: mapping[m.group(0)], text)
+    return SLANG_PATTERN.sub(lambda m: SLANG[m.group(0)], text)
 
 
 def _load_topic_stopwords() -> Set[str]:
@@ -246,11 +224,11 @@ def _clean_with_stopwords(text: str, stopwords: Set[str]) -> str:
 # 4. EXPOSED CLEANERS
 # ==============================================================================
 
-def clean_for_bert(text: str, extra_slang: Optional[dict] = None) -> str:
+def clean_for_bert(text: str) -> str:
     """Clean text for transformer input (e.g., IndoBERT).
 
     Keeps case, punctuation, and stopwords. Fixes encoding, strips URLs/@mentions,
-    unwraps hashtags, and normalises slang (plus `extra_slang`, see `normalize_slang()`).
+    unwraps hashtags, and normalises slang.
     """
     if not isinstance(text, str) or not text.strip():
         return ""
@@ -268,23 +246,17 @@ def clean_for_bert(text: str, extra_slang: Optional[dict] = None) -> str:
     text = RE_MENTION.sub(" ", text)
     text = RE_HASHTAG_KEEP.sub(r"\1", text)
     text = RE_WHITESPACE.sub(" ", text).strip()
-    return normalize_slang(text, extra_slang)
+    return normalize_slang(text)
 
 
 def clean_for_ner(text: str) -> str:
     """Clean text for span-based NER (e.g., GLiNER).
 
-    Differs from `clean_for_bert()` in three deliberate ways, all because NER labels are
-    character spans on this exact string:
-
-    - **No slang normalisation.** Rewriting "wowo" to "prabowo" changes the surface form the
-      annotator (or Gemini) sees, so stored spans would no longer match the original post.
-    - **@mentions keep their name.** `@prabowo` becomes `prabowo` instead of being deleted —
-      a handle is often the only mention of the entity in the post.
-    - **CamelCase hashtags are split.** `#PrabowoDiRusia` becomes `Prabowo Di Rusia`, which
-      gives the model separate, capitalised tokens to tag.
-
-    Case is kept (capitalisation is one of the strongest cues for names).
+    NER labels are character spans on the cleaned string, so this differs from
+    `clean_for_bert()` on purpose: no slang normalisation (rewriting "wowo" to "prabowo"
+    would move the span away from what the post says), @mentions keep their name (a handle
+    is often the only mention of the entity), and CamelCase hashtags are split
+    (#PrabowoDiRusia -> Prabowo Di Rusia) so the model sees separate capitalised tokens.
     """
     if not isinstance(text, str) or not text.strip():
         return ""
