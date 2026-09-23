@@ -15,6 +15,13 @@ level. Keep it that way -- a module-level `import ftfy` in `great/text.py` would
 
 `great.geo` follows the same rule: `flashtext` is imported on first use, not at import time.
 
+`great.pipeline` and `great.rules` are not re-exported either: the pipeline pulls `requests`,
+`openpyxl` and the `[text]` stack, and keeping the two topic-analysis packages out of the flat
+namespace keeps `from great import ...` what it has always been. Import them directly:
+
+    from great.pipeline import load, prep, store
+    from great.rules import load_project, apply_matcher
+
 `great.viz` is deliberately **not** re-exported here. It imports matplotlib, scikit-learn,
 wordcloud and (for `great.viz.environment`) geopandas at module level, so pulling it in would
 make `import great` require a full plotting and geospatial stack. Import it directly:
@@ -23,7 +30,7 @@ make `import great` require a full plotting and geospatial stack. Import it dire
     from great.viz.environment import env_two_bar
 """
 
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 from .labels import (
     sent_class,
