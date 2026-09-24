@@ -15,6 +15,10 @@ one — see [TUTORIAL.md §4](TUTORIAL.md) for the pinned-install syntax.
 - **`dominant_issues(counts, max_n=2, ratio=2.0)`** decides which issues become pies: it cuts
   at the widest gap among the top `max_n`, if the issue above that gap is at least `ratio`
   times the issue below. Public, so a notebook can print the decision next to the figure.
+- `env_bar_pies(island_bars=True)` adds a cases-per-island bar chart between the issue bars
+  and the pies. `example_env_daily.ipynb` now uses it with `max_dominant=1`, in place of
+  `env_two_bar()`. Both example notebooks read the export from a Google Sheets link instead
+  of a local path.
 
 `env_one_bar()` and `env_two_bar()` are unchanged.
 

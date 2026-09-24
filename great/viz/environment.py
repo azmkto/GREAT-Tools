@@ -548,7 +548,7 @@ _SERIF_TIMES = {"font.family": "serif", "font.serif": ["Times", "Times New Roman
 
 
 def env_bar_pies(data, start_date, end_date, *, province_col="Provinsi", issue_col="Isu_Inti",
-                 max_dominant=2, dominance_ratio=2.0, badge_size=18, show=True):
+                 max_dominant=2, dominance_ratio=2.0, island_bars=False, badge_size=18, show=True):
     """Map on top; below it the issue bar chart plus one province pie per dominant issue.
 
     When one or two issues dwarf the rest, a single bar chart squashes every other bar into
@@ -561,19 +561,24 @@ def env_bar_pies(data, start_date, end_date, *, province_col="Provinsi", issue_c
     max_dominant : most issues that can become pies.
     dominance_ratio : how many times larger than the next issue an issue must be to count as
         dominant. See `dominant_issues()` for exactly where the cut falls.
+    island_bars : add a cases-per-island bar chart between the issue bars and the pies --
+        the daily report's layout. Islands come from `island_counts()`, largest on top.
 
     Returns the Figure.
     """
     top_issues = dominant_issues(data[issue_col].value_counts(), max_dominant, dominance_ratio)
     n_pies = len(top_issues)
+    n_bars = 2 if island_bars else 1
     title_size = 32
 
     with plt.rc_context(_SERIF_TIMES):
-        fig = plt.figure(figsize=(30 + 8 * n_pies, 18))
+        fig = plt.figure(figsize=(30 + 12 * (n_bars - 1) + 8 * n_pies, 18))
         # A pie is only as wide as the row is tall, so an equal-width column leaves it floating
-        # in white space; the bar chart takes the width instead.
-        gs = fig.add_gridspec(2, 1 + n_pies, height_ratios=[1.1, 1], width_ratios=[1.6] + [1] * n_pies,
-                              wspace=0.05, hspace=0.15)
+        # in white space; the bar charts take the width instead. A second bar chart brings its
+        # own tick labels, which need the wider gap.
+        gs = fig.add_gridspec(2, n_bars + n_pies, height_ratios=[1.1, 1],
+                              width_ratios=[1.6] + [1.2] * (n_bars - 1) + [1] * n_pies,
+                              wspace=0.05 if n_bars == 1 else 0.2, hspace=0.15)
 
         map_gdf, prov_col = _map_with_counts(data, province_col)
         _panel_choropleth(
@@ -588,7 +593,13 @@ def env_bar_pies(data, start_date, end_date, *, province_col="Provinsi", issue_c
             "Distribusi Nasional Isu Lingkungan di Indonesia", title_size=title_size * 0.75,
         )
 
-        for col, issue in enumerate(top_issues, start=1):
+        if island_bars:
+            _panel_issue_bars_ramp(
+                fig.add_subplot(gs[1, 1]), island_counts(data, province_col),
+                "Distribusi Kasus Isu Lingkungan per Pulau", title_size=title_size * 0.75,
+            )
+
+        for col, issue in enumerate(top_issues, start=n_bars):
             _panel_issue_pie(
                 fig.add_subplot(gs[1, col]), data.loc[data[issue_col] == issue, province_col],
                 issue, title_size=title_size * 0.65,
