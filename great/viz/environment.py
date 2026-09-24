@@ -392,24 +392,23 @@ def _panel_issue_bars_ramp(ax, counts, title, *, title_size):
 
 
 def _panel_issue_pie(ax, provinces, issue, *, top_n=9, title_size, wrap_width=40):
-    """Which provinces one issue comes from: the top `top_n`, everything else as "Lainnya".
+    """Which provinces one issue comes from: the top `top_n`, the remaining provinces as "Lainnya".
 
-    Values that are not a province ("Tidak Terdeteksi", "Provinsi Tidak Spesifik") go into
-    "Lainnya" too -- a slice labelled "Tidak Terdeteksi" says nothing about where it happened.
+    Rows that are not a province ("Tidak Terdeteksi", "Provinsi Tidak Spesifik") are left out
+    of the pie and counted in a note underneath instead. Folded into "Lainnya" they swallowed
+    over half the pie, which then said more about the resolver than about the issue.
     """
     names = provinces.dropna().map(_canonicalize)
-    if names.empty:
+    known = names[names.isin(KNOWN_PROVINCES)].value_counts()
+    unplaced = len(provinces) - known.sum()
+    if known.empty:
         ax.axis("off")
         ax.text(0.5, 0.5, f"Data provinsi untuk\n'{issue}' tidak tersedia",
                 ha="center", va="center", fontsize=11)
         return
 
-    names = names.where(names.isin(KNOWN_PROVINCES), "Lainnya")
-    counts = names.value_counts()
-    known = counts.drop("Lainnya", errors="ignore")
-
     shown = known.iloc[:top_n].copy()
-    other = counts.sum() - shown.sum()
+    other = known.sum() - shown.sum()
     if other > 0:
         shown["Lainnya"] = other
     total = shown.sum()
@@ -424,7 +423,8 @@ def _panel_issue_pie(ax, provinces, issue, *, top_n=9, title_size, wrap_width=40
         labels=[textwrap.fill(name, wrap_width) for name in shown.index],
         colors=[cmap(shade) if shade else "#c9c9c9" for shade in shades],
         startangle=90, counterclock=False,
-        autopct=lambda pct: f"{pct:.0f}%\n({int(round(pct / 100 * total))})" if pct >= 3 else "",
+        # below 5% the number no longer fits its wedge and collides with the neighbour's
+        autopct=lambda pct: f"{pct:.0f}%\n({int(round(pct / 100 * total))})" if pct >= 5 else "",
         pctdistance=0.72, labeldistance=1.05,
         wedgeprops=dict(edgecolor="white", linewidth=1.2),
         textprops=dict(fontsize=14, fontweight="bold"),
@@ -433,6 +433,9 @@ def _panel_issue_pie(ax, provinces, issue, *, top_n=9, title_size, wrap_width=40
         autotext.set(fontsize=15, color="white" if shade > 0.55 else "#222222")
 
     ax.set_title(f"Rincian Isu Lingkungan:\n{issue}", fontsize=title_size, fontweight="bold", pad=12)
+    if unplaced:
+        ax.text(0.5, -0.08, f"{unplaced:,} kasus tanpa provinsi tidak dihitung",
+                transform=ax.transAxes, ha="center", va="top", fontsize=13, style="italic")
 
 
 def _period(start_date, end_date):
@@ -567,7 +570,10 @@ def env_bar_pies(data, start_date, end_date, *, province_col="Provinsi", issue_c
 
     with plt.rc_context(_SERIF_TIMES):
         fig = plt.figure(figsize=(30 + 8 * n_pies, 18))
-        gs = fig.add_gridspec(2, 1 + n_pies, height_ratios=[1.1, 1], wspace=0.05, hspace=0.15)
+        # A pie is only as wide as the row is tall, so an equal-width column leaves it floating
+        # in white space; the bar chart takes the width instead.
+        gs = fig.add_gridspec(2, 1 + n_pies, height_ratios=[1.1, 1], width_ratios=[1.6] + [1] * n_pies,
+                              wspace=0.05, hspace=0.15)
 
         map_gdf, prov_col = _map_with_counts(data, province_col)
         _panel_choropleth(
