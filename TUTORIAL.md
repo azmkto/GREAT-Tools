@@ -366,7 +366,7 @@ this conversation, or the pattern in `great/palette.py` + `wordcloud`'s
 | `great.viz.checks` | Load-time reports (they print, never raise) | `frame_info(obj, label)`, `share(series, top=None)`, `completeness/coverage/composition/author/labels(df)` |
 | `great.viz.overview` | The sentiment/platform overview figure | `weekly_overview(...)`, `monthly_overview(..., interval)` |
 | `great.viz.wordcloud` | Sentiment word clouds from distinctive TF-IDF terms | `sentiment_wordclouds(df)`, `prepare_corpus(df)`, `tfidf_matrix(texts)`, `distinctive_terms(X, terms, mask)`, `ramp(hex)` |
-| `great.viz.environment` | Indonesia choropleth reports for environmental issues | `env_one_bar(df, start, end)`, `env_two_bar(...)`, `province_counts(df)`, `island_counts(df)`; both reports take `badge_size` for the map count labels |
+| `great.viz.environment` | Indonesia choropleth reports for environmental issues | `env_bar_pies(df, start, end)`, `env_one_bar(...)`, `env_two_bar(...)`, `dominant_issues(counts)`, `province_counts(df)`, `island_counts(df)`; every report takes `badge_size` for the map count labels |
 | `great.viz.style` | Shared SciencePlots figure defaults | `apply_style(dpi=500)` |
 
 Two things worth knowing before you use them:

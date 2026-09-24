@@ -3,6 +3,21 @@
 Notable changes to `great`. Versions are tagged in git, so a notebook can pin a known-good
 one — see [TUTORIAL.md §4](TUTORIAL.md) for the pinned-install syntax.
 
+## Unreleased
+
+### Added
+
+- **`env_bar_pies()`**, the new weekly environment report: the map across the top, the issue
+  bar chart underneath, and a province pie beside it for each issue that dominates the week.
+  When one or two issues dwarf the rest, a single bar chart squashes every other bar into a
+  sliver. The dominant ones now leave the bar chart and get a pie each. With no dominant
+  issue there are no pies, and the bar chart shows every issue.
+- **`dominant_issues(counts, max_n=2, ratio=2.0)`** decides which issues become pies: it cuts
+  at the widest gap among the top `max_n`, if the issue above that gap is at least `ratio`
+  times the issue below. Public, so a notebook can print the decision next to the figure.
+
+`env_one_bar()` and `env_two_bar()` are unchanged.
+
 ## 0.3.2
 
 ### Breaking

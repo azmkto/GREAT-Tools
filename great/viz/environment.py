@@ -8,6 +8,7 @@ two public functions just arrange them:
 
     env_one_bar   map + 1 bar chart          figsize (38, 9)
     env_two_bar    map + 2 bar charts         figsize (30, 14)
+    env_bar_pies   map over bar + 0-2 pies    figsize (30 + 8 * pies, 18)
 
 Both expect a frame with `Provinsi` and `Isu_Inti` columns. Neither is in a raw export --
 derive them first with `great.classify_issue()` and `great.resolve_frame()`.
@@ -17,8 +18,10 @@ imported by `great/viz/__init__.py`, so `from great.viz import prep` does not dr
 """
 import os
 import pathlib
+import textwrap
 
 import geopandas as gpd
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import pandas as pd
 import requests
@@ -36,7 +39,7 @@ from ..geo import (
 
 __all__ = [
     "load_indonesia_geojson", "province_counts", "island_counts",
-    "env_one_bar", "env_two_bar",
+    "env_one_bar", "env_two_bar", "env_bar_pies", "dominant_issues",
 ]
 
 # The upstream province boundaries. Third party -- a network call happens on first use, and
@@ -214,6 +217,24 @@ def island_counts(data, province_col="Provinsi", order="count"):
     return counts.sort_values(ascending=True)
 
 
+def dominant_issues(counts, max_n=2, ratio=2.0):
+    """The top issues that tower over the rest, or [] when nothing does.
+
+    Looks at the gap below each of the top `max_n` issues and cuts at the widest one, if
+    the issue above that gap is at least `ratio` times the issue below it. 743 / 344 / 114
+    cuts after the second (344 / 114 = 3.0x beats 743 / 344 = 2.2x), so both become pies.
+
+    `counts` is a Series of case counts per issue, e.g. `data['Isu_Inti'].value_counts()`.
+    """
+    counts = counts.sort_values(ascending=False)
+    best_k, best_ratio = 0, 0.0
+    for k in range(1, min(max_n, len(counts) - 1) + 1):
+        gap = counts.iloc[k - 1] / counts.iloc[k]
+        if gap > best_ratio:
+            best_k, best_ratio = k, gap
+    return counts.index[:best_k].tolist() if best_ratio >= ratio else []
+
+
 def _map_with_counts(data, province_col="Provinsi"):
     """The GeoJSON joined to per-province case counts, zero-filled where absent."""
     map_gdf = load_indonesia_geojson()
@@ -340,6 +361,83 @@ def _ramp_bar_colors(counts):
     return plt.colormaps[palette.CMAP_NAME]([value / top for value in counts.values])
 
 
+def _panel_issue_bars_ramp(ax, counts, title, *, title_size):
+    """Issue bars on a gamma-stretched ramp, the count inside dark bars and outside pale ones.
+
+    Separate from `_panel_bars` because both the colouring and the label placement differ,
+    and the two existing reports depend on `_panel_bars` looking the way it does.
+    """
+    max_value = counts.max()
+    shades = mcolors.PowerNorm(gamma=0.4, vmin=counts.min(), vmax=max_value)(counts.values)
+    y_positions = range(len(counts))
+
+    ax.barh(y_positions, counts.values, color=plt.colormaps[palette.CMAP_NAME](shades), height=0.7)
+
+    for y_pos, value, shade in zip(y_positions, counts.values, shades):
+        is_dark = shade > 0.55
+        ax.text(
+            value - max_value * 0.01 if is_dark else value + max_value * 0.015, y_pos,
+            f"{int(value)}", va="center", ha="right" if is_dark else "left",
+            fontsize=13, fontweight="bold", color="white" if is_dark else "black",
+        )
+
+    ax.set_title(title, fontsize=title_size, fontweight="bold", pad=16)
+    ax.set_xlabel("Jumlah Kasus", fontsize=11, fontweight="bold")
+    ax.set_yticks(y_positions, labels=counts.index)
+    ax.set_ylim(-0.6, len(counts) - 0.4)
+    ax.tick_params(axis="y", labelsize=14, length=0)
+    ax.spines[["top", "right", "left"]].set_visible(False)
+    ax.xaxis.grid(True, linestyle="-", alpha=0.3, color="#e0e0e0")
+    ax.set_axisbelow(True)
+
+
+def _panel_issue_pie(ax, provinces, issue, *, top_n=9, title_size, wrap_width=40):
+    """Which provinces one issue comes from: the top `top_n`, the remaining provinces as "Lainnya".
+
+    Rows that are not a province ("Tidak Terdeteksi", "Provinsi Tidak Spesifik") are left out
+    of the pie and counted in a note underneath instead. Folded into "Lainnya" they swallowed
+    over half the pie, which then said more about the resolver than about the issue.
+    """
+    names = provinces.dropna().map(_canonicalize)
+    known = names[names.isin(KNOWN_PROVINCES)].value_counts()
+    unplaced = len(provinces) - known.sum()
+    if known.empty:
+        ax.axis("off")
+        ax.text(0.5, 0.5, f"Data provinsi untuk\n'{issue}' tidak tersedia",
+                ha="center", va="center", fontsize=11)
+        return
+
+    shown = known.iloc[:top_n].copy()
+    other = known.sum() - shown.sum()
+    if other > 0:
+        shown["Lainnya"] = other
+    total = shown.sum()
+
+    # 0.40..0.98 along the colormap, relative to the busiest province; 0 marks "Lainnya"
+    shades = [0.0 if name == "Lainnya" else 0.40 + 0.58 * value / known.iloc[0]
+              for name, value in shown.items()]
+    cmap = plt.colormaps[palette.CMAP_NAME]
+
+    _, _, autotexts = ax.pie(
+        shown.values,
+        labels=[textwrap.fill(name, wrap_width) for name in shown.index],
+        colors=[cmap(shade) if shade else "#c9c9c9" for shade in shades],
+        startangle=90, counterclock=False,
+        # below 5% the number no longer fits its wedge and collides with the neighbour's
+        autopct=lambda pct: f"{pct:.0f}%\n({int(round(pct / 100 * total))})" if pct >= 5 else "",
+        pctdistance=0.72, labeldistance=1.05,
+        wedgeprops=dict(edgecolor="white", linewidth=1.2),
+        textprops=dict(fontsize=14, fontweight="bold"),
+    )
+    for autotext, shade in zip(autotexts, shades):
+        autotext.set(fontsize=15, color="white" if shade > 0.55 else "#222222")
+
+    ax.set_title(f"Rincian Isu Lingkungan:\n{issue}", fontsize=title_size, fontweight="bold", pad=12)
+    if unplaced:
+        ax.text(0.5, -0.08, f"{unplaced:,} kasus tanpa provinsi tidak dihitung",
+                transform=ax.transAxes, ha="center", va="top", fontsize=13, style="italic")
+
+
 def _period(start_date, end_date):
     return f"{start_date} - {end_date}"
 
@@ -441,4 +539,63 @@ def env_two_bar(data, start_date, end_date, *, province_col="Provinsi",
     plt.subplots_adjust(left=0.02, right=0.98, top=0.9, bottom=0.05)
     if show:
         plt.show()
+    return fig
+
+
+# Serif Times, the font `great.viz.style` gets from SciencePlots -- set per figure instead of
+# through `apply_style()`, so this report looks the same whether or not a notebook called it.
+_SERIF_TIMES = {"font.family": "serif", "font.serif": ["Times", "Times New Roman", "Liberation Serif"]}
+
+
+def env_bar_pies(data, start_date, end_date, *, province_col="Provinsi", issue_col="Isu_Inti",
+                 max_dominant=2, dominance_ratio=2.0, badge_size=18, show=True):
+    """Map on top; below it the issue bar chart plus one province pie per dominant issue.
+
+    When one or two issues dwarf the rest, a single bar chart squashes every other bar into
+    a sliver. `dominant_issues()` picks those issues out, they leave the bar chart, and each
+    gets a pie of the provinces it comes from instead. With no dominant issue there are no
+    pies and the bar chart shows every issue.
+
+    Same arguments as `env_one_bar`, plus:
+
+    max_dominant : most issues that can become pies.
+    dominance_ratio : how many times larger than the next issue an issue must be to count as
+        dominant. See `dominant_issues()` for exactly where the cut falls.
+
+    Returns the Figure.
+    """
+    top_issues = dominant_issues(data[issue_col].value_counts(), max_dominant, dominance_ratio)
+    n_pies = len(top_issues)
+    title_size = 32
+
+    with plt.rc_context(_SERIF_TIMES):
+        fig = plt.figure(figsize=(30 + 8 * n_pies, 18))
+        # A pie is only as wide as the row is tall, so an equal-width column leaves it floating
+        # in white space; the bar chart takes the width instead.
+        gs = fig.add_gridspec(2, 1 + n_pies, height_ratios=[1.1, 1], width_ratios=[1.6] + [1] * n_pies,
+                              wspace=0.05, hspace=0.15)
+
+        map_gdf, prov_col = _map_with_counts(data, province_col)
+        _panel_choropleth(
+            fig.add_subplot(gs[0, :]), map_gdf, prov_col,
+            f"Persebaran Isu Lingkungan di Indonesia\n{_period(start_date, end_date)}",
+            missing_color="#ffffe0", badge_size=badge_size, title_size=title_size,
+        )
+
+        _panel_issue_bars_ramp(
+            fig.add_subplot(gs[1, 0]),
+            data[issue_col].value_counts().drop(top_issues).sort_values(),
+            "Distribusi Nasional Isu Lingkungan di Indonesia", title_size=title_size * 0.75,
+        )
+
+        for col, issue in enumerate(top_issues, start=1):
+            _panel_issue_pie(
+                fig.add_subplot(gs[1, col]), data.loc[data[issue_col] == issue, province_col],
+                issue, title_size=title_size * 0.65,
+            )
+
+        # not tight_layout(): the pie labels make it push the bottom row back apart
+        fig.subplots_adjust(left=0.10, right=0.98, top=0.94, bottom=0.04)
+        if show:
+            plt.show()
     return fig

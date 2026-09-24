@@ -85,7 +85,7 @@ and
 | `viz/checks.py` | `frame_info()`, `share()`, and the `completeness()`, `coverage()`, `composition()`, `author()`, `labels()` load-time reports |
 | `viz/overview.py` | `weekly_overview()`, `monthly_overview()` — needs `[viz]` |
 | `viz/wordcloud.py` | `sentiment_wordclouds()`, `distinctive_terms()`, `tfidf_matrix()`, `ramp()` — needs `[viz]` |
-| `viz/environment.py` | `env_one_bar()`, `env_two_bar()`, `province_counts()`, `island_counts()` — needs `[geo]` |
+| `viz/environment.py` | `env_bar_pies()`, `env_one_bar()`, `env_two_bar()`, `dominant_issues()`, `province_counts()`, `island_counts()` — needs `[geo]` |
 | `viz/style.py` | `apply_style()` — SciencePlots defaults |
 
 See [TUTORIAL.md](TUTORIAL.md) for the full guide.
