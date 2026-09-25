@@ -28,6 +28,7 @@ import requests
 from shapely.geometry import MultiPolygon
 
 from .. import palette
+from ..issues import _NOISE
 from ..geo import (
     GEO_FIX,
     ISLAND_ORDER,
@@ -556,6 +557,9 @@ def env_bar_pies(data, start_date, end_date, *, province_col="Provinsi", issue_c
     gets a pie of the provinces it comes from instead. With no dominant issue there are no
     pies and the bar chart shows every issue.
 
+    Rows classified 'Noise/Tidak Relevan' are dropped before anything is counted -- they are
+    not environmental issues, so they belong in neither the bars, the map nor the pies.
+
     Same arguments as `env_one_bar`, plus:
 
     max_dominant : most issues that can become pies.
@@ -566,6 +570,7 @@ def env_bar_pies(data, start_date, end_date, *, province_col="Provinsi", issue_c
 
     Returns the Figure.
     """
+    data = data[data[issue_col] != _NOISE]
     top_issues = dominant_issues(data[issue_col].value_counts(), max_dominant, dominance_ratio)
     n_pies = len(top_issues)
     n_bars = 2 if island_bars else 1

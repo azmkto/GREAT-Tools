@@ -19,6 +19,8 @@ one — see [TUTORIAL.md §4](TUTORIAL.md) for the pinned-install syntax.
   and the pies. `example_env_daily.ipynb` now uses it with `max_dominant=1`, in place of
   `env_two_bar()`. Both example notebooks read the export from a Google Sheets link instead
   of a local path.
+- `env_bar_pies()` drops rows classified 'Noise/Tidak Relevan' before counting, so they
+  appear in neither the bar charts, the map nor the pies.
 
 `env_one_bar()` and `env_two_bar()` are unchanged.
 
