@@ -34,7 +34,7 @@ On a Colab runtime — including VS Code attached to one — install from GitHub
 %pip install -q "great[all] @ git+https://github.com/azmkto/GREAT-Tools.git"
 ```
 
-See [TUTORIAL.md §1](TUTORIAL.md) for all three environments and private-repo access.
+See [TUTORIAL.md §1](TUTORIAL.md) for all three environments.
 
 ## Docs
 
