@@ -26,7 +26,8 @@ New here? Do [day one](#0-day-one) first. Installing is covered in
 
 ## 0. Day one
 
-1. Accept the emailed repository invitation. You cannot clone before this.
+1. Accept the emailed repository invitation. The repo is public, so anyone can clone it, but
+   you need the invitation to push branches.
 2. Clone and install:
    ```bash
    git clone https://github.com/azmkto/GREAT-Tools.git
@@ -45,11 +46,7 @@ New here? Do [day one](#0-day-one) first. Installing is covered in
    ```
    If it prints the palette, you are set. If you get `ModuleNotFoundError`, your Jupyter kernel
    is a different Python than the one you installed into — see TUTORIAL.md §1a.
-5. **Only if you will use Colab** (browser, or VS Code attached to a Colab runtime): create
-   a GitHub token — [TUTORIAL.md §1d](TUTORIAL.md) has the steps. As a collaborator you need a
-   **classic** token with the `repo` scope; fine-grained tokens cannot reach a private repo
-   owned by someone else’s personal account. Working locally needs no token at all.
-6. Skim [TUTORIAL.md §2 and §3](TUTORIAL.md) so you know what already exists. Adding a second
+5. Skim [TUTORIAL.md §2 and §3](TUTORIAL.md) so you know what already exists. Adding a second
    version of something the library already has is the most common wasted effort here.
 
 ---
@@ -87,7 +84,7 @@ git log -p -- great/           # the actual diffs to library code
 The runtime installed a *snapshot* from GitHub, so it will not see new commits on its own:
 
 ```python
-%pip install -q --upgrade --force-reinstall --no-deps "great[all] @ git+https://{token}@github.com/azmkto/GREAT-Tools.git"
+%pip install -q --upgrade --force-reinstall --no-deps "great[all] @ git+https://github.com/azmkto/GREAT-Tools.git"
 ```
 
 Then **restart the runtime** — `--force-reinstall` replaces the files, but the already-imported
@@ -313,10 +310,12 @@ TUTORIAL.md §4 has the pinned-install syntax.
 
 - **Data exports.** `.gitignore` blocks `*.xlsx`, `*.xls`, `*.csv` and `*.zip`. Keep it that
   way — the exports contain real mention text and author names, and they are large.
-- **Tokens, of any kind.** Not in a cell, not in a file, not in a commit message. If one
-  leaks, revoke it on GitHub immediately — deleting the commit is not enough, because it stays
-  in the history and in every clone anyone has already made.
+- **Tokens, of any kind** (GitHub, Hugging Face, API keys). Not in a cell, not in a file, not
+  in a commit message. If one leaks, revoke it immediately — deleting the commit is not enough,
+  because it stays in the history and in every clone anyone has already made.
+- **Notebook outputs you would not publish.** Outputs are committed with the notebook, so a
+  printed dataframe or a topic table is as public as the code. Clear outputs (Edit → Clear All
+  Outputs) before committing if they show mention text, author names, or client findings.
 - **Virtualenvs and build artifacts.** Also gitignored.
 
-A private repo is not a safe place for secrets. Every collaborator can read everything in it,
-and access can outlive your intent.
+This repo is public. Anyone on the internet can read every file and every past commit.
