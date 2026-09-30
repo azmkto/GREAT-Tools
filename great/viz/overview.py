@@ -358,7 +358,7 @@ def daily_overview(tiles, author_sent, robj, start_date, end_date, sent_colors=N
         tile = Rectangle((r['x'], r['y']), r['dx'], r['dy'], facecolor=tile_cmap(row.Count / top),
                          edgecolor='white', linewidth=1.5)
         ax_tree.add_patch(tile)
-        size = 7 + 21 * (row.Count / top) ** 0.5                         # bigger tile, bigger text
+        size = 4 + 21 * (row.Count / top) ** 0.5                         # bigger tile, bigger text
         chars = max(8, int(r['dx'] * points_per_unit / (0.7 * size)))   # bold glyphs are ~0.7 em wide
         for text, dy, kw in [(row.Topic, 4, dict(color='gold', fontsize=size * 0.65)),
                              (textwrap.fill(row.Headline, chars), 6 + size,
