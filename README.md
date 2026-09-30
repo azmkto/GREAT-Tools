@@ -1,13 +1,11 @@
-# great
+# **GREAT Big Data Analysis Program**
 
-The Python package inside the **GREAT-Tools** repository. You clone `GREAT-Tools`; you import
-`great`.
-
-Shared utilities for azmkto's social-media research notebooks — one place for the
-label vocabulary, color palette, text cleaning, environmental-issue rules, province
-geography, and the weekly/monthly visualization helpers that used to be copy-pasted across
-`Evolution Project`, `Topic Modelling Trial`, `IHSG Narratives`,
-`Weekly Monthly Visualization Program`, and friends.
+## **Introduction**
+The Python package inside the **GREAT-Tools** repository. Shared utilities made by Big Data and Information Desk of GREAT Institute for the label vocabulary, color palette, text cleaning, environmental-issue rules, province geography, and the weekly/monthly visualization helpers that used to be copy-pasted across all the projects
+## **Current Status**
+The library is still under development and there are many things ahead to come since the disruption of AI hits really hard and need to adapt. Current change consists:
+1. Finalize `topic_modelling.ipynb` using BERTopic and embedded with local LLM (Stable per 30 September 2026).
+2. 
 
 ## Install
 
@@ -83,9 +81,9 @@ and
 | `geo.py` | 1,243-entry gazetteer on official BPS codes, `resolve()`, `resolve_frame()`, province fixes, province→island mapping |
 | `viz/prep.py` | `prepare_data()`, `sentiment_data()`, `platform_data()`, `plat_sent_data()` |
 | `viz/checks.py` | `frame_info()`, `share()`, and the `completeness()`, `coverage()`, `composition()`, `author()`, `labels()` load-time reports |
-| `viz/overview.py` | `weekly_overview()`, `monthly_overview()` — needs `[viz]` |
+| `viz/overview.py` | `daily_overview()`, `weekly_overview()`, `monthly_overview()`, plus the daily data steps `keyword_tiles()`, `representative_posts()`, `author_sentiment()` — needs `[viz]` |
 | `viz/wordcloud.py` | `sentiment_wordclouds()`, `distinctive_terms()`, `tfidf_matrix()`, `ramp()` — needs `[viz]` |
-| `viz/environment.py` | `env_bar_pies()`, `env_one_bar()`, `env_two_bar()`, `dominant_issues()`, `province_counts()`, `island_counts()` — needs `[geo]` |
+| `viz/environment.py` | `env_daily()`, `env_weekly()`, `env_monthly()`, `dominant_issue()`, `province_counts()`, `island_counts()` — needs `[geo]` |
 | `viz/style.py` | `apply_style()` — SciencePlots defaults |
 
 See [TUTORIAL.md](TUTORIAL.md) for the full guide.

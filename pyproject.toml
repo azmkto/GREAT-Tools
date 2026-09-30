@@ -20,7 +20,7 @@ ml = ["scikit-learn"]
 text = ["ftfy", "nltk", "PySastrawi"]
 # great.viz imports every one of these at import time, so `from great.viz import ...`
 # never needs the notebook to install or import a plotting library itself.
-viz = ["matplotlib", "scienceplots", "wordcloud", "seaborn", "plotly", "great[ml]"]
+viz = ["matplotlib", "scienceplots", "wordcloud", "seaborn", "plotly", "squarify", "great[ml]"]
 # Choropleth maps in great.viz.environment. Kept out of [viz] because geopandas pulls
 # GDAL/PROJ, which is a slow and occasionally fragile install nobody should pay for
 # unless they actually want maps.

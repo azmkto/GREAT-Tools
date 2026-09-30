@@ -5,24 +5,61 @@ one — see [TUTORIAL.md §4](TUTORIAL.md) for the pinned-install syntax.
 
 ## Unreleased
 
+### Breaking
+
+**The environment reports are named after their period**, and the old names are gone with
+no aliases:
+
+| was | is now |
+|---|---|
+| `env_two_bar(df, start, end)` | `env_daily(df, start, end)` |
+| `env_one_bar(df, start, end)` | `env_weekly(df, start, end)` |
+| (new) | `env_monthly(df, start, end)` |
+
+- Every map is drawn the same way: no colorbar, same-size count badges. `badge_growth` is
+  gone from every report, and `island_order` from `env_daily` and `island_counts()`, which now
+  always sorts by count.
+- `province_counts()` returns its count column as `jumlah_unggahan` (was `jumlah_kasus`).
+  Every label on the environment figures says "unggahan" instead of "kasus", since the data
+  counts posts, not incidents.
+
+### Changed
+
+- **`env_weekly()`** draws a province pie next to the issue bars when the top issue has at
+  least `dominance_ratio` (default 2.0) times the posts of the second. That issue leaves the
+  bar chart, where it would flatten every other bar. The pie shows the top nine provinces with
+  the rest as "Lainnya" and "Provinsi Tidak Spesifik" as its own wedge. Below the ratio there
+  is no pie. The bars use the colormap ramp instead of pale bars with one highlight.
+- **`env_daily()`**: the map title now carries the date range.
+- Count badges have a tighter circle, and DKI Jakarta, Banten, Jawa Barat and DI Yogyakarta
+  are hand-placed so the Java badges no longer overlap.
+- All reports drop rows classified 'Noise/Tidak Relevan' before counting.
+- One font standard for every bar chart and pie: titles 20, tick labels and wedge names 14, bar
+  values and wedge percentages 16. Bar titles are one line; the date is on the map title only.
+
 ### Added
 
-- **`env_bar_pies()`**, the new weekly environment report: the map across the top, the issue
-  bar chart underneath, and a province pie beside it for each issue that dominates the week.
-  When one or two issues dwarf the rest, a single bar chart squashes every other bar into a
-  sliver. The dominant ones now leave the bar chart and get a pie each. With no dominant
-  issue there are no pies, and the bar chart shows every issue.
-- **`dominant_issues(counts, max_n=2, ratio=2.0)`** decides which issues become pies: it cuts
-  at the widest gap among the top `max_n`, if the issue above that gap is at least `ratio`
-  times the issue below. Public, so a notebook can print the decision next to the figure.
-- `env_bar_pies(island_bars=True)` adds a cases-per-island bar chart between the issue bars
-  and the pies. `example_env_daily.ipynb` now uses it with `max_dominant=1`, in place of
-  `env_two_bar()`. Both example notebooks read the export from a Google Sheets link instead
-  of a local path.
-- `env_bar_pies()` drops rows classified 'Noise/Tidak Relevan' before counting, so they
-  appear in neither the bar charts, the map nor the pies.
-
-`env_one_bar()` and `env_two_bar()` are unchanged.
+- **`daily_overview(tiles, author_sent, robj, start_date, end_date)`** in
+  `great.viz.overview`, next to `weekly_overview` / `monthly_overview`: a treemap of the day's
+  keyword tiles (darker = more posts, gold topic above a white headline) beside a pie of author
+  sentiment. Returns the Figure. Its data steps are public too:
+  - `keyword_tiles(data, exclude=(), n_tiles=20)`: each post's keyword, the one most
+    distinctive for it (TF-IDF) among the day's most-used terms, NaN outside the top `n_tiles`.
+  - `representative_posts(posts, n=4)`: the most repeated headlines of a tile, cleaned for an LLM.
+  - `author_sentiment(data)`: each author's most-posted sentiment, a tie counts as neutral.
+  The tile topics and headlines come from a local LLM in the notebook, which stays out of the
+  library: it depends on the runtime (llama-cpp build, GPU, a model of several GB).
+- `squarify` joins the `[viz]` extra (the treemap layout).
+- `great.palette.PANEL_TITLE_SIZE` / `PANEL_TICK_SIZE` / `PANEL_VALUE_SIZE` (20 / 14 / 16): the
+  font standard shared by the environment reports and `daily_overview`.
+- `Notebook/daily_report_notebook.ipynb`: the daily report for either issue, set by `ISSUES`.
+- **`env_monthly()`**: the map across the top; below it the posts-per-island bars, the issue
+  bars, and the pie (weekly's rule). Without a dominant issue the bottom row is the two bar charts.
+- `dominant_issue(counts, ratio=2.0)`: the top issue if it is at least `ratio` times the second,
+  else `None`. Public, so a notebook can print the decision next to the figure.
+- `Environment Visualization/example_env.ipynb` replaces `example_env_weekly.ipynb` and
+  `example_env_daily.ipynb`: one notebook, report picked with `REPORT_TYPE`, export read from
+  a Google Sheets link.
 
 ## 0.3.2
 

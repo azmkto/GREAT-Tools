@@ -277,9 +277,9 @@ this conversation, or the pattern in `great/palette.py` + `wordcloud`'s
 | `great.geo` | 1,243-entry location gazetteer on official BPS codes, province fixes, province→island mapping | `resolve(location, text)`, `resolve_frame(df)`, `is_known_province(value)`, `LOCATION_TO_PROVINCE`, `AMBIGUOUS_REGIONS`, `PROVINCE_FIX`, `PULAU_MAP`, `GEO_FIX`, `ISLAND_ORDER` |
 | `great.viz.prep` | Reshapes a raw export into the frames the plots consume | `prepare_data(df)`, `sentiment_data(df)`, `platform_data(df)`, `plat_sent_data(df)` |
 | `great.viz.checks` | Load-time reports (they print, never raise) | `frame_info(obj, label)`, `share(series, top=None)`, `completeness/coverage/composition/author/labels(df)` |
-| `great.viz.overview` | The sentiment/platform overview figure | `weekly_overview(...)`, `monthly_overview(..., interval)` |
+| `great.viz.overview` | The politics overview figures | `daily_overview(tiles, author_sent, robj, start, end)`, `weekly_overview(...)`, `monthly_overview(..., interval)`; daily data steps `keyword_tiles(df)`, `representative_posts(posts)`, `author_sentiment(df)` |
 | `great.viz.wordcloud` | Sentiment word clouds from distinctive TF-IDF terms | `sentiment_wordclouds(df)`, `prepare_corpus(df)`, `tfidf_matrix(texts)`, `distinctive_terms(X, terms, mask)`, `ramp(hex)` |
-| `great.viz.environment` | Indonesia choropleth reports for environmental issues | `env_bar_pies(df, start, end)`, `env_one_bar(...)`, `env_two_bar(...)`, `dominant_issues(counts)`, `province_counts(df)`, `island_counts(df)`; every report takes `badge_size` for the map count labels |
+| `great.viz.environment` | Indonesia choropleth reports for environmental issues | `env_daily(df, start, end)`, `env_weekly(...)`, `env_monthly(...)`, `dominant_issue(counts)`, `province_counts(df)`, `island_counts(df)`; every report takes `badge_size` for the map count labels |
 | `great.viz.style` | Shared SciencePlots figure defaults | `apply_style(dpi=500)` |
 
 Two things worth knowing before you use them:
@@ -452,8 +452,8 @@ Two notebooks in this repo exist purely to demonstrate the library end to end:
 |---|---|
 | `Weekly Visualization/example_weekly_with_great.ipynb` | The full flow with every argument passed explicitly |
 | `Monthly Visualization/example_monthly_with_great.ipynb` | The same flow leaning on the library defaults, plus the trend panel's `interval` |
-| `Environment Visualization/example_env_weekly.ipynb` | The environment report: Indonesia choropleth + one issue bar chart |
-| `Environment Visualization/example_env_daily.ipynb` | The same, plus a per-island bar chart and a map colorbar |
+| `Environment Visualization/example_env.ipynb` | The environment report, set by `REPORT_TYPE`: daily (map, issue bars, island bars), weekly (map, issue bars, optional province pie) or monthly (map on top; issue bars, optional pie, island bars) |
+| `Notebook/daily_report_notebook.ipynb` | The daily report for either issue, set by `ISSUES`: Politics runs the local LLM on `keyword_tiles()` and draws `daily_overview()`; Environment draws `env_daily()` |
 
 Both run top to bottom unattended against the export files, which live outside this repo
 (see the `DATA` cell near the top of each notebook, and `.gitignore` — exports are never

@@ -48,3 +48,8 @@ LABEL_SIZE = 13
 TICK_SIZE = 12
 ANNOT_SIZE = 12
 MAP_NUMBER_SIZE = 13
+
+# One font standard for every report bar chart and pie (env_daily/weekly/monthly, daily_overview).
+PANEL_TITLE_SIZE = 20   # bar and pie titles
+PANEL_TICK_SIZE = 14    # bar category/axis labels, pie wedge names
+PANEL_VALUE_SIZE = 16   # the number on each bar, the percent (count) inside each wedge

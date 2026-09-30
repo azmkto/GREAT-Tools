@@ -22,11 +22,11 @@ for the same reason one level down: it needs the `[geo]` extra, and geopandas pu
 Importing it here would make `from great.viz import prep` require a geospatial stack. Import
 it directly when you want maps:
 
-    from great.viz.environment import env_one_bar, env_two_bar
+    from great.viz.environment import env_daily, env_weekly, env_monthly
 """
 
 from . import checks, prep, style, wordcloud
-from .overview import monthly_overview, weekly_overview
+from .overview import daily_overview, monthly_overview, weekly_overview
 from .style import apply_style
 from .wordcloud import (
     distinctive_terms,
@@ -42,7 +42,7 @@ __all__ = [
     # style
     "apply_style",
     # overview figures
-    "weekly_overview", "monthly_overview",
+    "daily_overview", "weekly_overview", "monthly_overview",
     # word cloud pipeline
     "sentiment_wordclouds", "prepare_corpus", "tfidf_matrix",
     "distinctive_terms", "ramp",

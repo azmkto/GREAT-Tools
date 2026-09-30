@@ -20,7 +20,7 @@ wordcloud and (for `great.viz.environment`) geopandas at module level, so pullin
 make `import great` require a full plotting and geospatial stack. Import it directly:
 
     from great.viz.overview import weekly_overview
-    from great.viz.environment import env_two_bar
+    from great.viz.environment import env_daily
 """
 
 __version__ = "0.3.3"
