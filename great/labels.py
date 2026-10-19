@@ -100,3 +100,18 @@ def is_media_account(author, platform=None, extra_accounts=()):
             or any(kw in raw for kw in MEDIA_ACCOUNT_KEYWORDS)
             or norm.endswith(MEDIA_ACCOUNT_SUFFIXES)
             or raw.endswith(MEDIA_DOMAIN_SUFFIXES))
+
+
+# YouTube and Facebook exports put the channel's display name in Author, not a handle, and
+# is_media_account misses most of them ('KOMPASTV JAWA BARAT' fails every handle rule).
+MEDIA_NAME_WORDS = {'tv', 'berita', 'news', 'info', 'terkini', 'update', 'channel', 'official',
+                    'media', 'portal', 'redaksi', 'production', 'productions'}
+
+
+def is_media_name(author):
+    """True for a channel display name such as 'TV Rakyat | Seputar Info Terkini'.
+    Only names with a space are checked: on a bare handle these words are too common
+    ('infoterkini_fans'), and handles are is_media_account's job."""
+    author = str(author).strip()
+    words = re.findall(r'[a-z]+', author.lower())
+    return ' ' in author and any(w in MEDIA_NAME_WORDS or w.endswith('tv') for w in words)
