@@ -6,10 +6,49 @@ The usual sequence:
     sent_data = prep.sentiment_data(df1)   # Date x Sentiment  (wide)
     plat_data = prep.platform_data(df1)    # (Date, Media)     -> Count
     ps_data   = prep.plat_sent_data(df1)   # Media, Sentiment, Count (long)
+
+`find_export(folder, names)` picks the export to read from a folder of them.
 """
+import datetime as dt
+import re
+from pathlib import Path
+
 import pandas as pd
 
 from ..labels import MEDIA_MAP
+
+
+def _norm(name):
+    return re.sub(r'[\s_.\-]+', ' ', name).lower()
+
+
+def find_export(folder, names):
+    """The newest Excel export in `folder` whose file name contains any of `names`.
+
+    Names are compared case-insensitively with '_', '-' and '.' read as spaces, so
+    `'badan komunikasi'` matches `report_17736_all_all_20261012_20261012_2924_Badan_Komunikasi_Presiden.xlsx`
+    and `'prabowo'` matches both that naming scheme and a hand-named `Data Prabowo.xlsx`.
+    Newest is the end date in the name (`_YYYYMMDD_YYYYMMDD_`, the monitoring tool's scheme)
+    when there is one, otherwise the day the file was last modified. Excel lock files (`~$...`)
+    are skipped.
+
+    Raises FileNotFoundError listing the folder's Excel files when nothing matches.
+    """
+    names = [names] if isinstance(names, str) else names
+    files = [p for p in Path(folder).iterdir()
+             if p.suffix.lower() in ('.xlsx', '.xls') and not p.name.startswith('~$')]
+    hits = [p for p in files if any(_norm(n) in _norm(p.stem) for n in names)]
+    if not hits:
+        raise FileNotFoundError(f'No export matching {list(names)} in {folder}. '
+                                f'Excel files there: {sorted(p.name for p in files)}')
+
+    def newest(p):
+        m = re.search(r'_(\d{8})_(\d{8})_', p.name)
+        mtime = p.stat().st_mtime
+        day = dt.datetime.strptime(m[2], '%Y%m%d').date() if m else dt.date.fromtimestamp(mtime)
+        return day, mtime
+
+    return max(hits, key=newest)
 
 
 def prepare_data(data):

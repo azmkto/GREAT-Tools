@@ -13,10 +13,14 @@ Both return `(sent_pct_df, platform_totals_df)`.
 
 `daily_overview` is the daily figure: a treemap of the day's keywords (the notebook's local
 LLM writes each tile's topic and headline) beside a pie of author sentiment. Its data steps
-are public too -- `keyword_tiles`, `representative_posts`, `author_sentiment` -- so the
-notebook only adds the LLM call in between. It returns the Figure.
+are public too -- `keyword_tiles`, `representative_posts`, `author_sentiment`, and
+`label_tiles`, which runs the LLM step on a model the notebook passes in. It returns the Figure.
+
+For the daily slides the two halves are also drawn on their own, one PNG each:
+`daily_treemap(tiles)` and `sentiment_pie(author_sent)` (outside labels, no title or legend).
 """
 import html
+import json
 import textwrap
 
 import matplotlib.dates as mdates
@@ -324,6 +328,131 @@ def author_sentiment(data):
     return per_author.idxmax(axis=1).mask(tied, 'neutral')
 
 
+TILE_FIELDS = ['topic', 'headline']
+TILE_SCHEMA = {'type': 'object', 'properties': {f: {'type': 'string'} for f in TILE_FIELDS},
+               'required': TILE_FIELDS}
+
+TILE_PROMPT = """You are a media analyst at a socio-political think tank, summarising today's public discourse.
+
+These posts all use the keyword "{keyword}":
+{documents}
+
+Return JSON with exactly these fields:
+1. topic    - the topic in at most 3 words: the person, institution, or issue the posts are about.
+2. headline - one news-style headline of at most 7 words saying what happened, grounded in the posts.
+
+Answer in Indonesian. Output only JSON.
+"""
+
+
+def label_tiles(data, llm, exclude=(), n_tiles=20, n_docs=4, prompt=TILE_PROMPT, max_tokens=80):
+    """The daily treemap's tiles, with each tile's topic and headline written by `llm`.
+
+    `keyword_tiles` files the posts under the `n_tiles` biggest keywords; for each one the LLM
+    reads the keyword and its `n_docs` most repeated headlines (`representative_posts`).
+    `llm` is anything with llama-cpp's `create_chat_completion` -- the notebook loads the model,
+    the library never imports llama-cpp. A failed call is printed and the tile keeps the
+    keyword as its topic and its top headline, cut to 15 words, so one bad answer costs one tile.
+
+    Returns a frame [Keyword, Count, Topic, Headline], largest tile first.
+    """
+    keyword = keyword_tiles(data, exclude=exclude, n_tiles=n_tiles)
+    records = []
+    for kw, count in keyword.value_counts().items():
+        docs = representative_posts(data[keyword == kw], n=n_docs)
+        try:
+            r = llm.create_chat_completion(
+                messages=[{'role': 'user', 'content': prompt.format(
+                    keyword=kw, documents='\n'.join(f'- {d}' for d in docs))}],
+                response_format={'type': 'json_object', 'schema': TILE_SCHEMA},
+                temperature=0.2, max_tokens=max_tokens,
+            )
+            out = json.loads(r['choices'][0]['message']['content'])
+        except Exception as e:
+            print(f'{kw} failed: {type(e).__name__}: {e}')
+            out = {}
+        records.append({
+            'Keyword': kw,
+            'Count': count,
+            'Topic': (out.get('topic') or kw).strip(),
+            'Headline': (out.get('headline') or ' '.join(docs[0].split()[:15])).strip(),
+        })
+    return pd.DataFrame(records)
+
+
+def _sentiment_counts(author_sent):
+    """Authors per sentiment in the fixed order negative, positive, neutral (absent ones dropped)."""
+    sent = author_sent.value_counts()
+    return sent.reindex([s for s in ('negative', 'positive', 'neutral') if s in sent.index])
+
+
+def _draw_treemap(ax, fig, tiles):
+    """Draw the keyword tiles on `ax`. Call after the figure layout is final: text is sized to the tiles."""
+    top = tiles['Count'].max()
+    tile_cmap = LinearSegmentedColormap.from_list('tiles', ['#b22222', '#5a0f14'])   # darker = more posts
+
+    # squarify lays the tiles out on a 100 x 100 grid, largest top-left
+    rects = squarify.squarify(squarify.normalize_sizes(tiles['Count'], 100, 100), 0, 0, 100, 100)
+    ax.set(xlim=(0, 100), ylim=(100, 0))
+    ax.axis('off')
+    points_per_unit = ax.get_position().width * fig.get_figwidth() * 72 / 100
+
+    for r, row in zip(rects, tiles.itertuples()):
+        tile = Rectangle((r['x'], r['y']), r['dx'], r['dy'], facecolor=tile_cmap(row.Count / top),
+                         edgecolor='white', linewidth=1.5)
+        ax.add_patch(tile)
+        size = 4 + 21 * (row.Count / top) ** 0.5                         # bigger tile, bigger text
+        chars = max(8, int(r['dx'] * points_per_unit / (0.7 * size)))   # bold glyphs are ~0.7 em wide
+        for text, dy, kw in [(row.Topic, 4, dict(color='gold', fontsize=size * 0.65)),
+                             (textwrap.fill(row.Headline, chars), 6 + size,
+                              dict(color='white', fontsize=size, fontweight='bold'))]:
+            t = ax.annotate(text, (r['x'], r['y']), xytext=(5, -dy), textcoords='offset points',
+                            va='top', ha='left', linespacing=1.1, **kw)
+            t.set_clip_path(tile)
+
+
+def daily_treemap(tiles, show=True):
+    """The daily treemap on its own, for the slide: the left half of `daily_overview`, no title.
+
+    `tiles` as in `daily_overview`. Returns the Figure.
+    """
+    fig, ax = plt.subplots(figsize=(17, 8.5))
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)   # before measuring tiles
+    _draw_treemap(ax, fig, tiles)
+    if show:
+        plt.show()
+    return fig
+
+
+def sentiment_pie(author_sent, sent_colors=None, show=True):
+    """Author sentiment pie for the daily slide: no title, no legend.
+
+    Wedges run negative, positive, neutral clockwise from 12 o'clock. Each is labelled outside
+    with its name and share to one decimal ('Negative\\n39.7%') on a leader line in the wedge's
+    color. `author_sent` is one sentiment per author, from `author_sentiment`.
+
+    Returns the Figure.
+    """
+    sent_colors = palette.sent_colors if sent_colors is None else sent_colors
+    sent = _sentiment_counts(author_sent)
+
+    fig, ax = plt.subplots(figsize=(7, 7))
+    wedges, _ = ax.pie(sent.values, colors=[sent_colors[s] for s in sent.index],
+                       startangle=90, counterclock=False,
+                       wedgeprops=dict(edgecolor='white', linewidth=1.2))
+    for wedge, (s, n) in zip(wedges, sent.items()):
+        angle = np.deg2rad((wedge.theta1 + wedge.theta2) / 2)
+        x, y = np.cos(angle), np.sin(angle)
+        ax.annotate(f'{s.capitalize()}\n{n / sent.sum():.1%}', xy=(x, y), xytext=(1.3 * x, 1.3 * y),
+                    ha='left' if x >= 0 else 'right', va='center',
+                    fontsize=palette.PANEL_VALUE_SIZE, fontweight='bold',
+                    arrowprops=dict(arrowstyle='-', color=sent_colors[s], linewidth=1.5))
+    ax.set_aspect('equal')
+    if show:
+        plt.show()
+    return fig
+
+
 def daily_overview(tiles, author_sent, robj, start_date, end_date, sent_colors=None, show=True):
     """Daily figure: a treemap of the day's keyword tiles | a pie of author sentiment.
 
@@ -341,31 +470,11 @@ def daily_overview(tiles, author_sent, robj, start_date, end_date, sent_colors=N
     Returns the Figure.
     """
     sent_colors = palette.sent_colors if sent_colors is None else sent_colors
-    sent = author_sent.value_counts()
-    top = tiles['Count'].max()
-    tile_cmap = LinearSegmentedColormap.from_list('tiles', ['#b22222', '#5a0f14'])   # darker = more posts
+    sent = _sentiment_counts(author_sent)   # fixed order, clockwise from 12 o'clock
 
     fig, (ax_tree, ax_pie) = plt.subplots(1, 2, figsize=(24, 8.5), gridspec_kw={'width_ratios': [2.6, 1]})
     fig.subplots_adjust(left=0.01, right=0.97, top=0.88, bottom=0.03, wspace=0.12)   # before measuring tiles
-
-    # squarify lays the tiles out on a 100 x 100 grid, largest top-left
-    rects = squarify.squarify(squarify.normalize_sizes(tiles['Count'], 100, 100), 0, 0, 100, 100)
-    ax_tree.set(xlim=(0, 100), ylim=(100, 0))
-    ax_tree.axis('off')
-    points_per_unit = ax_tree.get_position().width * fig.get_figwidth() * 72 / 100
-
-    for r, row in zip(rects, tiles.itertuples()):
-        tile = Rectangle((r['x'], r['y']), r['dx'], r['dy'], facecolor=tile_cmap(row.Count / top),
-                         edgecolor='white', linewidth=1.5)
-        ax_tree.add_patch(tile)
-        size = 4 + 21 * (row.Count / top) ** 0.5                         # bigger tile, bigger text
-        chars = max(8, int(r['dx'] * points_per_unit / (0.7 * size)))   # bold glyphs are ~0.7 em wide
-        for text, dy, kw in [(row.Topic, 4, dict(color='gold', fontsize=size * 0.65)),
-                             (textwrap.fill(row.Headline, chars), 6 + size,
-                              dict(color='white', fontsize=size, fontweight='bold'))]:
-            t = ax_tree.annotate(text, (r['x'], r['y']), xytext=(5, -dy), textcoords='offset points',
-                                 va='top', ha='left', linespacing=1.1, **kw)
-            t.set_clip_path(tile)
+    _draw_treemap(ax_tree, fig, tiles)
 
     # the environment pies' style: name outside, percent (count) inside
     _, _, autotexts = ax_pie.pie(

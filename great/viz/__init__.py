@@ -26,7 +26,14 @@ it directly when you want maps:
 """
 
 from . import checks, prep, style, wordcloud
-from .overview import daily_overview, monthly_overview, weekly_overview
+from .overview import (
+    daily_overview,
+    daily_treemap,
+    label_tiles,
+    monthly_overview,
+    sentiment_pie,
+    weekly_overview,
+)
 from .style import apply_style
 from .wordcloud import (
     distinctive_terms,
@@ -43,6 +50,8 @@ __all__ = [
     "apply_style",
     # overview figures
     "daily_overview", "weekly_overview", "monthly_overview",
+    # daily slide pieces
+    "daily_treemap", "sentiment_pie", "label_tiles",
     # word cloud pipeline
     "sentiment_wordclouds", "prepare_corpus", "tfidf_matrix",
     "distinctive_terms", "ramp",
