@@ -25,6 +25,42 @@ no aliases:
 
 ### Changed
 
+- **`prep.prepare_data()` keeps the time of day in `Date`** (it used to floor to midnight).
+  `sentiment_data()` and `platform_data()` floor to the day themselves, so the daily, weekly and monthly
+  figures are unchanged (checked pixel for pixel). Code that grouped `df1` by `Date` itself now groups by
+  timestamp: use `df1['Date'].dt.normalize()` for days.
+- **`Notebook/topic_modelling.ipynb` writes `posts_<ISSUES>.parquet`**: every post that passed the date and
+  keyword filters, duplicates kept, every export column, full timestamp, plus `Topic` and `TopicLabel` from
+  the text it carries (empty for texts with fewer than 3 tokens, which the model never saw). It feeds the
+  network notebook. `_read()` now keeps every export column; the model still sees one copy of each text,
+  and `documents_<ISSUES>.parquet` is unchanged.
+- **Fixed in `topic_modelling`: ISO dates were read day-first.** `'2026-10-01'` became 10 Jan 2026 for every
+  day up to the 12th, scrambling topics over time. ISO text is now parsed as ISO; other layouts keep the
+  day/month detection.
+- **`Notebook/daily_report_notebook.ipynb`: `'Politics'` now makes the Prabowo and Bakom daily
+  briefs.** It reads the newest export for each entry of `EXPORT_NAMES` (Prabowo, Bakom, Dasco,
+  DPR, strategic programs) from `MyDrive/Data/Daily Brief Politik` and writes `treemap_<date>.png`,
+  `pie_prabowo_<date>.png`, `pie_bakom_<date>.png` (transparent, one per slide element) and the
+  tiles Excel to `MyDrive/model_result/Daily Brief/politics_<date>`. Only the Prabowo export is
+  required; a missing one is reported and skipped (no Bakom export, no Bakom pie), and every export
+  ending on a different day from Prabowo's is flagged. `'Environment'` draws the same figure as
+  before from `ENV_PATH`/`ENV_FILE` (`Data/Daily Brief Lingkungan`) into `environment_<date>`.
+  - The output folder and file names carry the date in the data, not the day the notebook ran.
+  - The LLM model is downloaded into `MyDrive/models` once and copied to the Colab disk in later
+    sessions, instead of downloading 5-6 GB every session.
+  - `Llama(n_ctx=4096)` -> `n_ctx=1024` with `flash_attn=True`, and the tile calls use
+    `max_tokens=80` (was 200). The prompts fit easily; prompt, schema and temperature are unchanged.
+- **`Notebook/report_notebook.ipynb`** reads both reports from `Data/Weekly Data`, choosing the
+  files itself: Weekly reads the newest export matching `OBJECT_NAMES`, Monthly every export whose
+  file-name dates overlap `MONTH` (`'YYYY-MM'`), trimmed to that month's days, so a week like
+  29 Sep - 5 Oct gives 29-30 Sep to September and 1-5 Oct to October. `PATH`/`FILE_NAME` are replaced
+  by `PATH`, `OBJECT_NAMES` and `MONTH`; `TIMESTAMP` is gone. The overview, environment and word cloud
+  figures are now saved as PNG to `model_result/Weekly Recap` or `model_result/Monthly Brief`, in a
+  folder named after the object and the data's first and last day (`prabowo_01102026_31102026`), so
+  the Prabowo, DPR and Bakom reports of one month sit side by side.
+- **`Notebook/topic_modelling.ipynb`** loads the LLM from the same Drive cache (`MODEL_DIR`) as the
+  daily notebook instead of downloading it every session.
+
 - **`env_weekly()`** draws a province pie next to the issue bars when the top issue has at
   least `dominance_ratio` (default 2.0) times the posts of the second. That issue leaves the
   bar chart, where it would flatten every other bar. The pie shows the top nine provinces with
@@ -38,6 +74,30 @@ no aliases:
   values and wedge percentages 16. Bar titles are one line; the date is on the map title only.
 
 ### Added
+
+- **`Notebook/network_analysis.ipynb`**: the PEP, influence and coordination networks in one notebook, read from a
+  topic run's `posts_<ISSUES>.parquet`. `NETWORKS` picks the branches to run. It merges `author_network_extractor`
+  (influence, coordination, unchanged methods) and `pep_ner_simple` (NER, name normalization, roles), and adds:
+  topics on every edge and community (`Topic`, `TopicLabel`, `Topics`); one shared summary per network (nodes, edges,
+  density, components, giant-component share, clustering, communities, modularity Q) plus a comparison table;
+  degree, strength and betweenness for PEPs; Gephi CSVs with every node and edge. Fixed on the way: PEP edges and
+  nodes were cut to the top 20 persons, PEPs named alone were dropped, an article and its retweets were counted as
+  two documents, `pep_sentiment.png` was saved blank, and a cell used `top` before it was defined.
+  Transfer entropy is not carried over.
+- **Daily slide pieces** in `great.viz.overview`, one figure each so the charts drop straight into
+  the slide template:
+  - `daily_treemap(tiles)`: the treemap half of `daily_overview`, no title. Both draw through one
+    helper, and `daily_overview`'s output is unchanged.
+  - `sentiment_pie(author_sent)`: author sentiment, negative/positive/neutral clockwise from 12
+    o'clock, outside labels with the share to one decimal on leader lines, no title, no legend.
+  - `label_tiles(data, llm, exclude, n_tiles, n_docs)`: the LLM step that was in the notebook
+    (`TILE_PROMPT`, `TILE_SCHEMA`), on a model the notebook passes in. Returns the tiles frame.
+- `great.viz.prep.find_export(folder, names)`: the newest Excel export whose file name contains any of
+  `names` (case-insensitive, `_`/`-`/`.` read as spaces). Newest is the end date in the monitoring
+  tool's `_YYYYMMDD_YYYYMMDD_` name, or the modified day for files named by hand.
+- `great.viz.prep.month_exports(folder, names, month)`: every export whose file-name dates overlap
+  `month`, with the month's first and last day for trimming the rows.
+- `tests/test_daily.py`: checks for the above, `python tests/test_daily.py`.
 
 - **`daily_overview(tiles, author_sent, robj, start_date, end_date)`** in
   `great.viz.overview`, next to `weekly_overview` / `monthly_overview`: a treemap of the day's

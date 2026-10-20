@@ -53,10 +53,18 @@ from great.text import clean_for_bert, clean_for_topics
 from great.viz import prep, checks, wordcloud
 from great.viz.style import apply_style
 from great.viz.overview import weekly_overview, monthly_overview
+from great.viz.overview import label_tiles, daily_treemap, sentiment_pie
 from great.viz.wordcloud import sentiment_wordclouds
 ```
 
 For the working example could be seen in the `Notebook` folder.
+
+| Notebook | What it makes |
+|---|---|
+| `daily_report_notebook.ipynb` | Daily brief charts: Prabowo treemap and pies, Bakom pie, or the environment map |
+| `report_notebook.ipynb` | Weekly recap / monthly brief figures from `Data/Weekly Data` |
+| `topic_modelling.ipynb` | BERTopic topics with LLM labels; `documents_<ISSUES>.parquet` and `posts_<ISSUES>.parquet` (every post with its topic) |
+| `network_analysis.ipynb` | PEP co-mention, influence and coordination networks from `posts_<ISSUES>.parquet`, with statistics and Gephi CSVs |
 
 ## Modules
 
@@ -68,9 +76,9 @@ For the working example could be seen in the `Notebook` folder.
 | `text.py`            | `SLANG`, stopword sets, `clean_for_bert()`, `clean_for_topics()` — needs `[text]`                                                                                          |
 | `issues.py`          | Environmental issue keyword rules and `classify_issue()`                                                                                                                   |
 | `geo.py`             | 1,243-entry gazetteer on official BPS codes, `resolve()`, `resolve_frame()`, province fixes, province→island mapping                                                       |
-| `viz/prep.py`        | `prepare_data()`, `sentiment_data()`, `platform_data()`, `plat_sent_data()`                                                                                                |
+| `viz/prep.py`        | `prepare_data()`, `sentiment_data()`, `platform_data()`, `plat_sent_data()`, `find_export()` (newest export in a folder by file-name words), `month_exports()` (exports covering a month)                                    |
 | `viz/checks.py`      | `frame_info()`, `share()`, and the `completeness()`, `coverage()`, `composition()`, `author()`, `labels()` load-time reports                                               |
-| `viz/overview.py`    | `daily_overview()`, `weekly_overview()`, `monthly_overview()`, plus the daily data steps `keyword_tiles()`, `representative_posts()`, `author_sentiment()` — needs `[viz]` |
+| `viz/overview.py`    | `daily_overview()`, `weekly_overview()`, `monthly_overview()`, plus the daily data steps `keyword_tiles()`, `representative_posts()`, `author_sentiment()`, `label_tiles()` (LLM passed in) and the slide charts `daily_treemap()`, `sentiment_pie()` — needs `[viz]` |
 | `viz/wordcloud.py`   | `sentiment_wordclouds()`, `distinctive_terms()`, `tfidf_matrix()`, `ramp()` — needs `[viz]`                                                                                |
 | `viz/environment.py` | `env_daily()`, `env_weekly()`, `env_monthly()`, `dominant_issue()`, `province_counts()`, `island_counts()` — needs `[geo]`                                                 |
 | `viz/style.py`       | `apply_style()` — SciencePlots defaults                                                                                                                                    |

@@ -7,8 +7,10 @@ The usual sequence:
     plat_data = prep.platform_data(df1)    # (Date, Media)     -> Count
     ps_data   = prep.plat_sent_data(df1)   # Media, Sentiment, Count (long)
 
-`find_export(folder, names)` picks the export to read from a folder of them.
+`find_export(folder, names)` picks the export to read from a folder of them, and
+`month_exports(folder, names, month)` every export that covers part of a month.
 """
+import calendar
 import datetime as dt
 import re
 from pathlib import Path
@@ -20,6 +22,49 @@ from ..labels import MEDIA_MAP
 
 def _norm(name):
     return re.sub(r'[\s_.\-]+', ' ', name).lower()
+
+
+def _matching(folder, names):
+    """Excel exports in `folder` whose name contains any of `names`; raises when there are none."""
+    names = [names] if isinstance(names, str) else names
+    files = [p for p in Path(folder).iterdir()
+             if p.suffix.lower() in ('.xlsx', '.xls') and not p.name.startswith('~$')]
+    hits = [p for p in files if any(_norm(n) in _norm(p.stem) for n in names)]
+    if not hits:
+        raise FileNotFoundError(f'No export matching {list(names)} in {folder}. '
+                                f'Excel files there: {sorted(p.name for p in files)}')
+    return hits
+
+
+def _name_dates(p):
+    """(start, end) from the monitoring tool's `_YYYYMMDD_YYYYMMDD_` file name, or None."""
+    m = re.search(r'_(\d{8})_(\d{8})_', p.name)
+    return tuple(dt.datetime.strptime(d, '%Y%m%d').date() for d in m.groups()) if m else None
+
+
+def month_exports(folder, names, month):
+    """Every export in `folder` matching `names` that covers any day of `month` ('YYYY-MM').
+
+    The dates come from the file names (the monitoring tool's `_YYYYMMDD_YYYYMMDD_`), so no file
+    is opened to decide. A week that crosses the month boundary is included in both months; trim
+    the rows to `first_day`..`last_day` after reading so each day is counted in one month only.
+    Files without dates in the name are skipped and listed.
+
+    Returns `(files, first_day, last_day)`, files sorted by start date.
+    """
+    year, mon = map(int, month.split('-'))
+    first = dt.date(year, mon, 1)
+    last = dt.date(year, mon, calendar.monthrange(year, mon)[1])
+
+    hits = _matching(folder, names)
+    undated = sorted(p.name for p in hits if _name_dates(p) is None)
+    if undated:
+        print(f'Skipped, no dates in the name: {undated}')
+    files = sorted((p for p in hits if _name_dates(p) and _name_dates(p)[0] <= last
+                    and _name_dates(p)[1] >= first), key=_name_dates)
+    if not files:
+        raise FileNotFoundError(f'No export matching {list(names)} in {folder} covers {month}')
+    return files, first, last
 
 
 def find_export(folder, names):
@@ -34,25 +79,19 @@ def find_export(folder, names):
 
     Raises FileNotFoundError listing the folder's Excel files when nothing matches.
     """
-    names = [names] if isinstance(names, str) else names
-    files = [p for p in Path(folder).iterdir()
-             if p.suffix.lower() in ('.xlsx', '.xls') and not p.name.startswith('~$')]
-    hits = [p for p in files if any(_norm(n) in _norm(p.stem) for n in names)]
-    if not hits:
-        raise FileNotFoundError(f'No export matching {list(names)} in {folder}. '
-                                f'Excel files there: {sorted(p.name for p in files)}')
-
     def newest(p):
-        m = re.search(r'_(\d{8})_(\d{8})_', p.name)
         mtime = p.stat().st_mtime
-        day = dt.datetime.strptime(m[2], '%Y%m%d').date() if m else dt.date.fromtimestamp(mtime)
-        return day, mtime
+        dates = _name_dates(p)
+        return (dates[1] if dates else dt.date.fromtimestamp(mtime)), mtime
 
-    return max(hits, key=newest)
+    return max(_matching(folder, names), key=newest)
 
 
 def prepare_data(data):
-    """Normalise dates, platform spelling and sentiment case; sort by date.
+    """Parse dates, normalise platform spelling and sentiment case; sort by date.
+
+    `Date` keeps its time of day, which the coordination and timing analyses need; the
+    daily helpers below floor it to the day themselves.
 
     Returns `(data, start_date, end_date)` where the two dates are pre-formatted
     `'%d %b %Y'` strings for use in plot titles.
@@ -67,7 +106,7 @@ def prepare_data(data):
     # left alone, a single file ends up with a mix of correct and swapped dates.
     # `format='ISO8601'` also fails loudly if an export ever arrives in another layout,
     # instead of quietly mis-parsing it.
-    data['Date'] = pd.to_datetime(data['Date'], format='ISO8601').dt.normalize()
+    data['Date'] = pd.to_datetime(data['Date'], format='ISO8601')
     data['Media'] = data['Media'].replace(MEDIA_MAP)
     data['Sentiment'] = data['Sentiment'].str.strip().str.lower()
     data = data.sort_values('Date', ascending=True)
@@ -78,12 +117,12 @@ def prepare_data(data):
 
 def sentiment_data(data):
     """Daily sentiment counts, wide: one row per Date, one column per sentiment."""
-    return data.groupby('Date')['Sentiment'].value_counts().unstack(fill_value=0)
+    return data.groupby(data['Date'].dt.normalize())['Sentiment'].value_counts().unstack(fill_value=0)
 
 
 def platform_data(data):
     """Daily platform counts as a long Series named 'Count', indexed (Date, Media)."""
-    return (data.groupby('Date')['Media']
+    return (data.groupby(data['Date'].dt.normalize())['Media']
                 .value_counts().unstack(fill_value=0).stack().rename('Count'))
 
 
